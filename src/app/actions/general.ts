@@ -1,0 +1,66 @@
+'use server'
+
+import { prisma } from '@/lib/prisma'
+
+export type AvailableDate = {
+    month: number
+    year: number
+    label: string
+}
+
+export async function getAvailableMonths(): Promise<AvailableDate[]> {
+    try {
+        // Fetch all dates from expenses and incomes
+        const [gastos, ingresos] = await Promise.all([
+            prisma.gasto.findMany({
+                select: { fecha: true },
+                orderBy: { fecha: 'desc' }
+            }),
+            prisma.ingreso.findMany({
+                select: { fecha: true },
+                orderBy: { fecha: 'desc' }
+            })
+        ])
+
+        // Combine all dates
+        const allDates = [
+            ...gastos.map(g => g.fecha),
+            ...ingresos.map(i => i.fecha),
+            new Date() // Always include current date
+        ]
+
+        // Create a Set of unique "Year-Month" strings to filter duplicates
+        const uniqueMonths = new Set<string>()
+        const availableDates: AvailableDate[] = []
+
+        allDates.forEach(date => {
+            const d = new Date(date)
+            const key = `${d.getFullYear()}-${d.getMonth()}`
+
+            if (!uniqueMonths.has(key)) {
+                uniqueMonths.add(key)
+                availableDates.push({
+                    month: d.getMonth(),
+                    year: d.getFullYear(),
+                    label: key // Temporary label, not used for display
+                })
+            }
+        })
+
+        // Sort descending (newest first)
+        return availableDates.sort((a, b) => {
+            if (a.year !== b.year) return b.year - a.year
+            return b.month - a.month
+        })
+
+    } catch (error) {
+        console.error('Error fetching available months:', error)
+        // Return at least current month on error
+        const now = new Date()
+        return [{
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            label: 'Current'
+        }]
+    }
+}

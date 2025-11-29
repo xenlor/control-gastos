@@ -1,0 +1,117 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Configuración global
+model Configuracion {
+  id                 Int      @id @default(autoincrement())
+  porcentajeAhorro   Float    @default(0.0) // Porcentaje automático para ahorro
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// Categorías de gastos
+model Categoria {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique // ej: "Suscripciones", "Compras Online", "Casa", "Comida Rápida"
+  color       String   @default("#6366f1") // Color para gráficos
+  icono       String?  // Nombre del icono de lucide-react
+  createdAt   DateTime @default(now())
+  gastos      Gasto[]
+}
+
+// Ingresos mensuales
+model Ingreso {
+  id          Int      @id @default(autoincrement())
+  monto       Float
+  descripcion String
+  fecha       DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+// Gastos fijos mensuales
+model Gasto {
+  id             Int       @id @default(autoincrement())
+  monto          Float
+  descripcion    String
+  categoriaId    Int
+  categoria      Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+  fecha          DateTime  @default(now())
+  esCompartido   Boolean   @default(false) // Si proviene de gastos compartidos
+  gastoCompartidoId Int?
+  gastoCompartido   GastoCompartido? @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+}
+
+// Dinero prestado a otras personas
+model Prestamo {
+  id              Int      @id @default(autoincrement())
+  persona         String   // A quién se prestó
+  monto           Float
+  fechaPrestamo   DateTime @default(now())
+  fechaRecordatorio DateTime // Fecha para recordar cobrar
+  pagado          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Compras a plazos/cuotas
+model Plazo {
+  id                 Int      @id @default(autoincrement())
+  descripcion        String   // Nombre del producto/servicio
+  montoTotal         Float    // Valor total de la compra
+  totalCuotas        Int      // Número total de cuotas
+  cuotasPagadas      Int      @default(0) // Cuotas pagadas hasta ahora
+  montoCuota         Float    // Monto de cada cuota (calculado: montoTotal / totalCuotas)
+  fechaInicio        DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// Gastos compartidos (luz, internet, alquiler, etc.)
+model GastoCompartido {
+  id          Int      @id @default(autoincrement())
+  descripcion String   // ej: "Luz", "Internet", "Alquiler"
+  montoTotal  Float    // Total del gasto compartido
+  fecha       DateTime @default(now())
+  miembros    MiembroGastoCompartido[]
+  gastos      Gasto[]  // Enlaces a los gastos individuales generados
+  createdAt   DateTime @default(now())
+}
+
+// Miembros de la familia para calcular proporción de gastos compartidos
+model MiembroGastoCompartido {
+  id                 Int              @id @default(autoincrement())
+  nombre             String
+  ingresoMensual     Float            // Ingreso del miembro para calcular porcentaje
+  esUsuario          Boolean          @default(false) // true si es el usuario principal
+  gastoCompartidoId  Int
+  gastoCompartido    GastoCompartido  @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
+  createdAt          DateTime         @default(now())
+}
+
+// Miembros del hogar (configuración global)
+model Miembro {
+  id             Int      @id @default(autoincrement())
+  nombre         String
+  ingresoMensual Float
+  esUsuario      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Ahorro {
+  id          Int      @id @default(autoincrement())
+  monto       Float
+  descripcion String
+  fecha       DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
