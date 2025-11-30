@@ -1,5 +1,5 @@
-import { getPlazos, addPlazo, payCuota, deletePlazo } from '../actions/plazos'
-import { Plus, Calendar, DollarSign, ShoppingBag, CreditCard, Trash2, CheckCircle2 } from 'lucide-react'
+import { getPlazos, addPlazo, payCuota, deletePlazo, revertCuota } from '../actions/plazos'
+import { Plus, Calendar, DollarSign, ShoppingBag, CreditCard, Trash2, CheckCircle2, RotateCcw } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { format } from 'date-fns'
@@ -23,6 +23,11 @@ export default async function PlazosPage() {
     async function handleDeletePlazo(id: number) {
         'use server'
         await deletePlazo(id)
+    }
+
+    async function handleRevertCuota(id: number) {
+        'use server'
+        await revertCuota(id)
     }
 
     return (
@@ -87,6 +92,16 @@ export default async function PlazosPage() {
                                 min="1"
                                 icon={<Calendar className="w-5 h-5" />}
                                 required
+                            />
+
+                            <Input
+                                id="cuotasPagadas"
+                                name="cuotasPagadas"
+                                type="number"
+                                label="Cuotas ya pagadas"
+                                placeholder="Ej: 0"
+                                min="0"
+                                icon={<CheckCircle2 className="w-5 h-5" />}
                             />
 
                             <Input
@@ -175,6 +190,19 @@ export default async function PlazosPage() {
                                             </div>
 
                                             <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/5">
+                                                {plazo.cuotasPagadas > 0 && (
+                                                    <form action={handleRevertCuota.bind(null, plazo.id)}>
+                                                        <button
+                                                            type="submit"
+                                                            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-warning/10 text-warning hover:bg-warning/20 transition-colors"
+                                                            title="Revertir última cuota"
+                                                        >
+                                                            <RotateCcw className="w-4 h-4" />
+                                                            Revertir
+                                                        </button>
+                                                    </form>
+                                                )}
+
                                                 {!isPaid && (
                                                     <form action={handlePayCuota.bind(null, plazo.id)}>
                                                         <button

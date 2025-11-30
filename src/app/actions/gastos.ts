@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function getGastos(month?: number, year?: number) {
+export async function getGastos(month?: number, year?: number, categoryIds?: number[]) {
     const where: any = {}
 
     if (month !== undefined && year !== undefined) {
@@ -13,6 +13,12 @@ export async function getGastos(month?: number, year?: number) {
         where.fecha = {
             gte: startDate,
             lte: endDate
+        }
+    }
+
+    if (categoryIds && categoryIds.length > 0) {
+        where.categoriaId = {
+            in: categoryIds
         }
     }
 

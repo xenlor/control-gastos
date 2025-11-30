@@ -5,9 +5,9 @@ import { es } from 'date-fns/locale'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { NewCategoryForm } from '@/components/NewCategoryForm'
-
 import { MonthSelector } from '@/components/ui/MonthSelector'
 import { getAvailableMonths } from '../actions/general'
+import { CategoryFilter } from '@/components/CategoryFilter'
 
 export default async function GastosPage({
     searchParams,
@@ -18,8 +18,13 @@ export default async function GastosPage({
     const month = resolvedSearchParams.month ? parseInt(resolvedSearchParams.month as string) : new Date().getMonth()
     const year = resolvedSearchParams.year ? parseInt(resolvedSearchParams.year as string) : new Date().getFullYear()
 
+    // Parse category IDs from URL
+    const categoryIds = resolvedSearchParams.categories
+        ? (resolvedSearchParams.categories as string).split(',').map(Number)
+        : []
+
     const [gastos, categorias, availableMonths] = await Promise.all([
-        getGastos(month, year),
+        getGastos(month, year, categoryIds),
         getCategorias(),
         getAvailableMonths()
     ])
@@ -46,6 +51,7 @@ export default async function GastosPage({
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                     <MonthSelector availableDates={availableMonths} />
+                    <CategoryFilter categorias={categorias} />
                     <div className="glass-panel px-6 py-3 rounded-xl flex items-center gap-4 border-danger/20 bg-danger/5 flex-1 md:flex-none justify-between md:justify-start">
                         <div className="flex items-center gap-4">
                             <div className="p-2 rounded-lg bg-danger/20 text-danger">

@@ -37,7 +37,7 @@ export async function addPlazo(formData: FormData) {
                 totalCuotas,
                 montoCuota,
                 fechaInicio,
-                cuotasPagadas: 0,
+                cuotasPagadas: formData.get('cuotasPagadas') ? parseInt(formData.get('cuotasPagadas') as string) : 0,
             },
         })
 
@@ -57,11 +57,37 @@ export async function payCuota(id: number) {
         if (!plazo) return { success: false, error: 'Plazo no encontrado' }
         if (plazo.cuotasPagadas >= plazo.totalCuotas) return { success: false, error: 'Plazo ya pagado' }
 
-        await prisma.plazo.update({
+        const updatedPlazo = await prisma.plazo.update({
             where: { id },
             data: {
                 cuotasPagadas: { increment: 1 },
             },
+        })
+
+        // Create expense for this payment
+        // 1. Find or create "Compras a plazos" category
+        let categoria = await prisma.categoria.findUnique({
+            where: { nombre: 'Compras a plazos' }
+        })
+
+        if (!categoria) {
+            categoria = await prisma.categoria.create({
+                data: {
+                    nombre: 'Compras a plazos',
+                    color: '#f59e0b', // Amber/Orange
+                    icono: 'CreditCard'
+                }
+            })
+        }
+
+        // 2. Create the expense
+        await prisma.gasto.create({
+            data: {
+                monto: plazo.montoCuota,
+                descripcion: `Cuota ${updatedPlazo.cuotasPagadas} de ${plazo.totalCuotas} - ${plazo.descripcion}`,
+                categoriaId: categoria.id,
+                fecha: new Date(),
+            }
         })
 
         revalidatePath('/plazos')
@@ -85,5 +111,50 @@ export async function deletePlazo(id: number) {
     } catch (error) {
         console.error('Error deleting plazo:', error)
         return { success: false, error: 'Error al eliminar el plazo' }
+    }
+}
+
+export async function revertCuota(id: number) {
+    try {
+        const plazo = await prisma.plazo.findUnique({ where: { id } })
+
+        if (!plazo) return { success: false, error: 'Plazo no encontrado' }
+        if (plazo.cuotasPagadas <= 0) return { success: false, error: 'No hay cuotas para revertir' }
+
+        // 1. Decrement cuotasPagadas
+        const updatedPlazo = await prisma.plazo.update({
+            where: { id },
+            data: {
+                cuotasPagadas: { decrement: 1 },
+            },
+        })
+
+        // 2. Find and delete the corresponding expense
+        // We look for an expense with the exact description generated during payment
+        // Description format: `Cuota ${cuotasPagadas} de ${totalCuotas} - ${descripcion}`
+        // Note: We use the *original* cuotasPagadas (before decrement) which corresponds to the expense we want to delete.
+        // Since we already decremented, we use updatedPlazo.cuotasPagadas + 1
+        const cuotaRevertida = updatedPlazo.cuotasPagadas + 1
+        const descripcionGasto = `Cuota ${cuotaRevertida} de ${plazo.totalCuotas} - ${plazo.descripcion}`
+
+        const gasto = await prisma.gasto.findFirst({
+            where: {
+                descripcion: descripcionGasto,
+                monto: plazo.montoCuota
+            }
+        })
+
+        if (gasto) {
+            await prisma.gasto.delete({
+                where: { id: gasto.id }
+            })
+        }
+
+        revalidatePath('/plazos')
+        revalidatePath('/')
+        return { success: true }
+    } catch (error) {
+        console.error('Error reverting cuota:', error)
+        return { success: false, error: 'Error al revertir cuota' }
     }
 }
