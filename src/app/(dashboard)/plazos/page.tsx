@@ -1,4 +1,4 @@
-import { getPlazos, addPlazo, payCuota, deletePlazo, revertCuota } from '../actions/plazos'
+import { getPlazos, addPlazo, payCuota, deletePlazo, revertCuota } from '@/app/actions/plazos'
 import { Plus, Calendar, DollarSign, ShoppingBag, CreditCard, Trash2, CheckCircle2, RotateCcw } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'

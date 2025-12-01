@@ -10,15 +10,15 @@ import {
     DollarSign,
     Tag
 } from 'lucide-react'
-import { getIngresos } from './actions/ingresos'
-import { getGastos } from './actions/gastos'
+import { getIngresos } from '@/app/actions/ingresos'
+import { getGastos } from '@/app/actions/gastos'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { ExpensesDonutChart } from '@/components/ExpensesDonutChart'
 
 import { MonthSelector } from '@/components/ui/MonthSelector'
-import { getAvailableMonths } from './actions/general'
-import { getSavingsAnalysis } from './actions/ahorros'
+import { getAvailableMonths } from '@/app/actions/general'
+import { getSavingsAnalysis } from '@/app/actions/ahorros'
 import { DownloadReportButton } from '@/components/DownloadReportButton'
 import { NewTransactionButton } from '@/components/NewTransactionButton'
 

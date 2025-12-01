@@ -1,16 +1,45 @@
 import { render, screen } from '@testing-library/react'
-import DashboardPage from './page'
+import DashboardPage from './(dashboard)/page'
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock server actions
-vi.mock('./actions/ingresos', () => ({
+// Mock server actions
+vi.mock('@/app/actions/ahorros', () => ({
+    getSavingsAnalysis: vi.fn().mockResolvedValue({
+        totalAhorrado: 150.0,
+        percentageSaved: 10.0,
+    }),
+}))
+
+// Polyfill ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+    observe() { }
+    unobserve() { }
+    disconnect() { }
+};
+
+// Mock server actions
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: vi.fn(),
+        replace: vi.fn(),
+        prefetch: vi.fn(),
+    }),
+    useSearchParams: () => ({
+        get: vi.fn().mockReturnValue(null),
+        toString: vi.fn().mockReturnValue(''),
+    }),
+    usePathname: () => '/',
+}))
+
+vi.mock('@/app/actions/ingresos', () => ({
     getIngresos: vi.fn().mockResolvedValue([
         { id: 1, monto: 1000, descripcion: 'Salary', fecha: new Date('2023-10-01') },
         { id: 2, monto: 500, descripcion: 'Freelance', fecha: new Date('2023-10-05') },
     ]),
 }))
 
-vi.mock('./actions/gastos', () => ({
+vi.mock('@/app/actions/gastos', () => ({
     getGastos: vi.fn().mockResolvedValue([
         {
             id: 1,
@@ -24,7 +53,7 @@ vi.mock('./actions/gastos', () => ({
 
 describe('DashboardPage', () => {
     it('calculates and displays totals correctly', async () => {
-        const page = await DashboardPage()
+        const page = await DashboardPage({ searchParams: Promise.resolve({}) })
         render(page)
 
         // Total Income: 1000 + 500 = 1500
@@ -41,7 +70,7 @@ describe('DashboardPage', () => {
     })
 
     it('renders recent transactions', async () => {
-        const page = await DashboardPage()
+        const page = await DashboardPage({ searchParams: Promise.resolve({}) })
         render(page)
 
         expect(screen.getByText('Salary')).toBeInTheDocument()

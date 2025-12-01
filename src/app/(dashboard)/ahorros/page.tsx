@@ -1,11 +1,11 @@
-import { getAhorros, addAhorro, deleteAhorro, getSavingsAnalysis } from '../actions/ahorros'
-import { PiggyBank, Plus, Trash2, TrendingUp, Target, Calendar, DollarSign, FileText } from 'lucide-react'
+import { getAhorros, addAhorro, deleteAhorro, getSavingsAnalysis } from '@/app/actions/ahorros'
+import { PiggyBank, Plus, Trash2, TrendingUp, Target, Calendar, DollarSign, FileText, TrendingDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { MonthSelector } from '@/components/ui/MonthSelector'
-import { getAvailableMonths } from '../actions/general'
+import { getAvailableMonths } from '@/app/actions/general'
 
 export default async function AhorrosPage({
     searchParams,

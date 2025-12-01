@@ -1,9 +1,9 @@
-import { getMiembros, addMiembro, deleteMiembro, getGastosCompartidos, addGastoCompartido, deleteGastoCompartido } from '../actions/gastos-compartidos'
+import { getMiembros, addMiembro, deleteMiembro, getGastosCompartidos, addGastoCompartido, deleteGastoCompartido } from '@/app/actions/gastos-compartidos'
 import { Plus, Users, DollarSign, Trash2, PieChart, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { MonthSelector } from '@/components/ui/MonthSelector'
-import { getAvailableMonths } from '../actions/general'
+import { getAvailableMonths } from '@/app/actions/general'
 import { EditGastoCompartidoModal } from '@/components/EditGastoCompartidoModal'
 
 export default async function GastosCompartidosPage({

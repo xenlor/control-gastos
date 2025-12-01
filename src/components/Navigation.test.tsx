@@ -7,11 +7,16 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/',
 }))
 
+// Mock auth actions
+vi.mock('@/app/actions/auth', () => ({
+    logout: vi.fn(),
+}))
+
 describe('Navigation', () => {
     it('renders the logo', () => {
         render(<Navigation />)
-        expect(screen.getByText('Finanzas')).toBeInTheDocument()
-        expect(screen.getByText('Personal')).toBeInTheDocument()
+        expect(screen.getByText('Control Gastos')).toBeInTheDocument()
+        expect(screen.getByText('Finanzas Personales')).toBeInTheDocument()
     })
 
     it('renders navigation links', () => {
@@ -20,5 +25,10 @@ describe('Navigation', () => {
         expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument()
         expect(screen.getAllByText('Ingresos')[0]).toBeInTheDocument()
         expect(screen.getAllByText('Gastos')[0]).toBeInTheDocument()
+    })
+
+    it('renders the logout button', () => {
+        render(<Navigation />)
+        expect(screen.getAllByTitle('Cerrar Sesión')[0]).toBeInTheDocument()
     })
 })

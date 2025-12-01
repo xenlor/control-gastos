@@ -1,4 +1,4 @@
-import { getPrestamos, addPrestamo, togglePrestamoPagado, deletePrestamo } from '../actions/prestamos'
+import { getPrestamos, addPrestamo, togglePrestamoPagado, deletePrestamo } from '@/app/actions/prestamos'
 import { Plus, Calendar, DollarSign, User, Bell, CheckCircle2, XCircle, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

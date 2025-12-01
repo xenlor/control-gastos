@@ -3,7 +3,7 @@ import PlazosPage from './page'
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock server actions
-vi.mock('../actions/plazos', () => ({
+vi.mock('@/app/actions/plazos', () => ({
     getPlazos: vi.fn().mockResolvedValue([
         {
             id: 1,

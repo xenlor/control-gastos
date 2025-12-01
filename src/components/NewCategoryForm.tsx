@@ -19,7 +19,7 @@ export function NewCategoryForm() {
     }
 
     return (
-        <div className="glass-panel p-6 rounded-2xl mt-6">
+        <div className="glass-panel p-6 rounded-2xl">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between group"

@@ -3,7 +3,7 @@ import PrestamosPage from './page'
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock server actions
-vi.mock('../actions/prestamos', () => ({
+vi.mock('@/app/actions/prestamos', () => ({
     getPrestamos: vi.fn().mockResolvedValue([
         {
             id: 1,

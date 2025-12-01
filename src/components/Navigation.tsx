@@ -11,9 +11,11 @@ import {
     Users,
     Wallet,
     PiggyBank,
-    HandCoins
+    HandCoins,
+    LogOut
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { logout } from '@/app/actions/auth'
 
 const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -73,9 +75,16 @@ export default function Navigation() {
                             </div>
                         </div>
 
-                        {/* Theme Toggle */}
-                        <div className="flex items-center gap-4">
+                        {/* Theme Toggle & Logout */}
+                        <div className="flex items-center gap-2">
                             <ThemeToggle />
+                            <button
+                                onClick={() => logout()}
+                                className="p-2 hover:bg-white/5 rounded-lg transition-colors text-muted hover:text-red-500"
+                                title="Cerrar Sesión"
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -111,8 +120,14 @@ export default function Navigation() {
                                 </Link>
                             )
                         })}
-                        <div className="flex flex-col items-center justify-end p-1 flex-1 min-w-0">
+                        <div className="flex flex-col items-center justify-end p-1 flex-1 min-w-0 gap-1">
                             <ThemeToggle className="p-1.5 w-8 h-8 flex items-center justify-center" />
+                            <button
+                                onClick={() => logout()}
+                                className="p-1.5 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5 text-muted hover:text-red-500 transition-colors"
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>

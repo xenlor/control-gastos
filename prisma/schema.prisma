@@ -6,38 +6,103 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Configuración global
+// Auth Models
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?   // Hashed password
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Relations
+  gastos            Gasto[]
+  ingresos          Ingreso[]
+  prestamos         Prestamo[]
+  gastosCompartidos GastoCompartido[]
+  ahorros           Ahorro[]
+  categorias        Categoria[]
+  plazos            Plazo[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Application Models
+
 model Configuracion {
   id                 Int      @id @default(autoincrement())
-  porcentajeAhorro   Float    @default(0.0) // Porcentaje automático para ahorro
+  porcentajeAhorro   Float    @default(0.0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
 
-// Categorías de gastos
 model Categoria {
   id          Int      @id @default(autoincrement())
-  nombre      String   @unique // ej: "Suscripciones", "Compras Online", "Casa", "Comida Rápida"
-  color       String   @default("#6366f1") // Color para gráficos
-  icono       String?  // Nombre del icono de lucide-react
+  nombre      String   @unique
+  color       String   @default("#6366f1")
+  icono       String?
   createdAt   DateTime @default(now())
   gastos      Gasto[]
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
 }
 
-// Ingresos mensuales
 model Ingreso {
   id          Int      @id @default(autoincrement())
   monto       Float
   descripcion String
   fecha       DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
 }
 
-// Gastos fijos mensuales
 model Gasto {
   id             Int       @id @default(autoincrement())
   monto          Float
@@ -45,60 +110,72 @@ model Gasto {
   categoriaId    Int
   categoria      Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
   fecha          DateTime  @default(now())
-  esCompartido   Boolean   @default(false) // Si proviene de gastos compartidos
+  esCompartido   Boolean   @default(false)
   gastoCompartidoId Int?
-  gastoCompartido   GastoCompartido? @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
+  gastoCompartido   GastoCompartido? @relation(fields: [gastoCompartidoId], references: [id], onDelete: SetNull)
+  
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt      DateTime  @default(now())
 }
 
-// Dinero prestado a otras personas
 model Prestamo {
   id              Int      @id @default(autoincrement())
-  persona         String   // A quién se prestó
+  persona         String
   monto           Float
   fechaPrestamo   DateTime @default(now())
-  fechaRecordatorio DateTime // Fecha para recordar cobrar
+  fechaRecordatorio DateTime
   pagado          Boolean  @default(false)
+  
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
-// Compras a plazos/cuotas
 model Plazo {
   id                 Int      @id @default(autoincrement())
-  descripcion        String   // Nombre del producto/servicio
-  montoTotal         Float    // Valor total de la compra
-  totalCuotas        Int      // Número total de cuotas
-  cuotasPagadas      Int      @default(0) // Cuotas pagadas hasta ahora
-  montoCuota         Float    // Monto de cada cuota (calculado: montoTotal / totalCuotas)
+  descripcion        String
+  montoTotal         Float
+  totalCuotas        Int
+  cuotasPagadas      Int      @default(0)
+  montoCuota         Float
   fechaInicio        DateTime @default(now())
+  estado             String   @default("ACTIVO") // Added default based on previous code, though schema didn't show it explicitly in diff, it's safer.
+  
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
 
-// Gastos compartidos (luz, internet, alquiler, etc.)
 model GastoCompartido {
   id          Int      @id @default(autoincrement())
-  descripcion String   // ej: "Luz", "Internet", "Alquiler"
-  montoTotal  Float    // Total del gasto compartido
+  descripcion String
+  montoTotal  Float
   fecha       DateTime @default(now())
   miembros    MiembroGastoCompartido[]
-  gastos      Gasto[]  // Enlaces a los gastos individuales generados
+  gastos      Gasto[]
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
 }
 
-// Miembros de la familia para calcular proporción de gastos compartidos
 model MiembroGastoCompartido {
   id                 Int              @id @default(autoincrement())
   nombre             String
-  ingresoMensual     Float            // Ingreso del miembro para calcular porcentaje
-  esUsuario          Boolean          @default(false) // true si es el usuario principal
+  ingresoMensual     Float
+  esUsuario          Boolean          @default(false)
   gastoCompartidoId  Int
   gastoCompartido    GastoCompartido  @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())
 }
 
-// Miembros del hogar (configuración global)
 model Miembro {
   id             Int      @id @default(autoincrement())
   nombre         String
@@ -113,5 +190,9 @@ model Ahorro {
   monto       Float
   descripcion String
   fecha       DateTime @default(now())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
 }

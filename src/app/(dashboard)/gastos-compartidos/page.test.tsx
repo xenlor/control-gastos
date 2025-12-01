@@ -3,7 +3,20 @@ import GastosCompartidosPage from './page'
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock server actions
-vi.mock('../actions/gastos-compartidos', () => ({
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: vi.fn(),
+        replace: vi.fn(),
+        prefetch: vi.fn(),
+    }),
+    useSearchParams: () => ({
+        get: vi.fn().mockReturnValue(null),
+        toString: vi.fn().mockReturnValue(''),
+    }),
+    usePathname: () => '/',
+}))
+
+vi.mock('@/app/actions/gastos-compartidos', () => ({
     getMiembros: vi.fn().mockResolvedValue([
         { id: 1, nombre: 'Yo', ingresoMensual: 2000, esUsuario: true },
         { id: 2, nombre: 'Pareja', ingresoMensual: 1000, esUsuario: false },
@@ -27,7 +40,7 @@ vi.mock('../actions/gastos-compartidos', () => ({
 
 describe('GastosCompartidosPage', () => {
     it('renders the header and members', async () => {
-        const page = await GastosCompartidosPage()
+        const page = await GastosCompartidosPage({ searchParams: Promise.resolve({}) })
         render(page)
         expect(screen.getByText('Gastos Compartidos')).toBeInTheDocument()
         expect(screen.getByText('Miembros del Hogar')).toBeInTheDocument()
@@ -41,7 +54,7 @@ describe('GastosCompartidosPage', () => {
     })
 
     it('renders shared expenses with correct split', async () => {
-        const page = await GastosCompartidosPage()
+        const page = await GastosCompartidosPage({ searchParams: Promise.resolve({}) })
         render(page)
 
         expect(screen.getByText('Alquiler')).toBeInTheDocument()

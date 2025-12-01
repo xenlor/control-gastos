@@ -1,10 +1,9 @@
-import { getIngresos, addIngreso, deleteIngreso } from '../actions/ingresos'
-import { Trash2, TrendingUp, Plus, Calendar, DollarSign, FileText } from 'lucide-react'
+import { getIngresos, addIngreso, deleteIngreso } from '@/app/actions/ingresos'
+import { Plus, Trash2, TrendingUp, Calendar, DollarSign, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 import { MonthSelector } from '@/components/ui/MonthSelector'
-import { getAvailableMonths } from '../actions/general'
+import { getAvailableMonths } from '@/app/actions/general'
 
 export default async function IngresosPage({
     searchParams,

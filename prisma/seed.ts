@@ -3,41 +3,44 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-    console.log('Seeding database...')
+    console.log('🌱 Seeding default categories...')
 
-    // Crear configuración inicial
-    const config = await prisma.configuracion.upsert({
-        where: { id: 1 },
-        update: {},
-        create: {
-            porcentajeAhorro: 10.0, // 10% de ahorro por defecto
-        },
+    // 1. Find the Admin user (we created it in migration)
+    const admin = await prisma.user.findUnique({
+        where: { email: 'admin@admin.com' }
     })
-    console.log('✓ Configuración creada:', config)
 
-    // Crear categorías por defecto
-    const categorias = [
-        { nombre: 'Suscripciones', color: '#8b5cf6', icono: 'CreditCard' },
-        { nombre: 'Compras Online', color: '#ec4899', icono: 'ShoppingCart' },
-        { nombre: 'Gastos de la Casa', color: '#10b981', icono: 'Home' },
-        { nombre: 'Comida Rápida', color: '#f59e0b', icono: 'UtensilsCrossed' },
-        { nombre: 'Transporte', color: '#3b82f6', icono: 'Car' },
-        { nombre: 'Entretenimiento', color: '#f43f5e', icono: 'Gamepad2' },
-        { nombre: 'Salud', color: '#06b6d4', icono: 'Heart' },
-        { nombre: 'Educación', color: '#6366f1', icono: 'BookOpen' },
+    if (!admin) {
+        console.error('❌ Admin user not found. Please run migration first.')
+        return
+    }
+
+    const categories = [
+        { nombre: 'Alimentación', color: '#ef4444', icono: 'Utensils' },
+        { nombre: 'Transporte', color: '#f97316', icono: 'Car' },
+        { nombre: 'Vivienda', color: '#eab308', icono: 'Home' },
+        { nombre: 'Servicios', color: '#84cc16', icono: 'Zap' },
+        { nombre: 'Ocio', color: '#06b6d4', icono: 'Gamepad2' },
+        { nombre: 'Salud', color: '#3b82f6', icono: 'Heart' },
+        { nombre: 'Ropa', color: '#8b5cf6', icono: 'Shirt' },
+        { nombre: 'Educación', color: '#d946ef', icono: 'GraduationCap' },
         { nombre: 'Otros', color: '#64748b', icono: 'MoreHorizontal' },
     ]
 
-    for (const cat of categorias) {
+    for (const cat of categories) {
         await prisma.categoria.upsert({
             where: { nombre: cat.nombre },
             update: {},
-            create: cat,
+            create: {
+                nombre: cat.nombre,
+                color: cat.color,
+                icono: cat.icono,
+                userId: admin.id
+            }
         })
     }
-    console.log(`✓ ${categorias.length} categorías creadas`)
 
-    console.log('Seed completado exitosamente!')
+    console.log('✅ Default categories seeded successfully.')
 }
 
 main()
@@ -45,7 +48,7 @@ main()
         await prisma.$disconnect()
     })
     .catch(async (e) => {
-        console.error('Error durante seed:', e)
+        console.error(e)
         await prisma.$disconnect()
         process.exit(1)
     })

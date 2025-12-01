@@ -3,7 +3,20 @@ import IngresosPage from './page'
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock server actions
-vi.mock('../actions/ingresos', () => ({
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: vi.fn(),
+        replace: vi.fn(),
+        prefetch: vi.fn(),
+    }),
+    useSearchParams: () => ({
+        get: vi.fn().mockReturnValue(null),
+        toString: vi.fn().mockReturnValue(''),
+    }),
+    usePathname: () => '/',
+}))
+
+vi.mock('@/app/actions/ingresos', () => ({
     getIngresos: vi.fn().mockResolvedValue([
         {
             id: 1,
@@ -24,7 +37,7 @@ vi.mock('../actions/ingresos', () => ({
 
 describe('IngresosPage', () => {
     it('renders the header and total summary', async () => {
-        const page = await IngresosPage()
+        const page = await IngresosPage({ searchParams: Promise.resolve({}) })
         render(page)
         expect(screen.getByText('Ingresos')).toBeInTheDocument()
         expect(screen.getByText('Total Mensual')).toBeInTheDocument()
@@ -34,7 +47,7 @@ describe('IngresosPage', () => {
     })
 
     it('renders the form elements', async () => {
-        const page = await IngresosPage()
+        const page = await IngresosPage({ searchParams: Promise.resolve({}) })
         render(page)
         expect(screen.getByLabelText('Monto (€)')).toBeInTheDocument()
         expect(screen.getByLabelText('Descripción')).toBeInTheDocument()
@@ -43,7 +56,7 @@ describe('IngresosPage', () => {
     })
 
     it('renders the income list', async () => {
-        const page = await IngresosPage()
+        const page = await IngresosPage({ searchParams: Promise.resolve({}) })
         render(page)
 
         expect(screen.getByText('Nómina')).toBeInTheDocument()
