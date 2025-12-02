@@ -9,7 +9,7 @@ async function main() {
     const username = process.argv[2];
     const password = process.argv[3];
     const name = process.argv[4] || username;
-    const role = process.argv[5] || 'USER';
+    const role = (process.argv[5] || 'USER').toUpperCase();
 
     if (!username || !password) {
         console.log('❌ Uso: node scripts/crear-usuario.js <username> <password> [nombre] [role]');
