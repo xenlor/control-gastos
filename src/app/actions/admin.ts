@@ -85,6 +85,21 @@ export async function createUser(data: any) {
                     create: {
                         porcentajeAhorro: 20.0
                     }
+                },
+                categorias: {
+                    createMany: {
+                        data: [
+                            { nombre: 'Comida', color: '#EF4444', icono: 'UtensilsCrossed' },
+                            { nombre: 'Transporte', color: '#3B82F6', icono: 'Car' },
+                            { nombre: 'Vivienda', color: '#10B981', icono: 'Home' },
+                            { nombre: 'Ocio', color: '#F59E0B', icono: 'Sparkles' },
+                            { nombre: 'Salud', color: '#EC4899', icono: 'Heart' },
+                            { nombre: 'Educación', color: '#8B5CF6', icono: 'GraduationCap' },
+                            { nombre: 'Préstamos', color: '#64748B', icono: 'HandCoins' },
+                            { nombre: 'Plazos', color: '#F43F5E', icono: 'CreditCard' },
+                            { nombre: 'Gastos Compartidos', color: '#EC4899', icono: 'Users' }
+                        ]
+                    }
                 }
             }
         })

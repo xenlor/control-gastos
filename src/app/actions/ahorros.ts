@@ -89,7 +89,7 @@ export async function getSavingsAnalysis(month: number, year: number) {
         const startDate = new Date(year, month, 1)
         const endDate = new Date(year, month + 1, 0, 23, 59, 59)
 
-        const [ingresos, ahorros] = await Promise.all([
+        const [ingresos, ahorros, accumulatedSavings] = await Promise.all([
             prisma.ingreso.aggregate({
                 where: {
                     userId: user.id,
@@ -109,11 +109,18 @@ export async function getSavingsAnalysis(month: number, year: number) {
                     }
                 },
                 _sum: { monto: true }
+            }),
+            prisma.ahorro.aggregate({
+                where: {
+                    userId: user.id
+                },
+                _sum: { monto: true }
             })
         ])
 
         const totalIngresos = ingresos._sum.monto || 0
         const totalAhorrado = ahorros._sum.monto || 0
+        const accumulatedTotal = accumulatedSavings._sum.monto || 0
 
         // Get user configuration for savings percentage
         const config = await prisma.configuracion.findUnique({
@@ -126,6 +133,7 @@ export async function getSavingsAnalysis(month: number, year: number) {
         return {
             totalIngresos,
             totalAhorrado,
+            accumulatedSavings: accumulatedTotal,
             targetAhorro,
             percentageSaved: totalIngresos > 0 ? (totalAhorrado / totalIngresos) * 100 : 0
         }
@@ -134,6 +142,7 @@ export async function getSavingsAnalysis(month: number, year: number) {
         return {
             totalIngresos: 0,
             totalAhorrado: 0,
+            accumulatedSavings: 0,
             targetAhorro: 0,
             percentageSaved: 0
         }

@@ -42,7 +42,8 @@ export default async function DashboardPage({
 
     const totalIngresos = ingresos.reduce((sum, item) => sum + item.monto, 0)
     const totalGastos = gastos.reduce((sum, item) => sum + item.monto, 0)
-    const balance = totalIngresos - totalGastos
+    // Balance = Income - Expenses - Monthly Savings
+    const balance = totalIngresos - totalGastos - savingsAnalysis.totalAhorrado
 
     // Combine and sort transactions by date
     const recentTransactions = [
@@ -110,7 +111,7 @@ export default async function DashboardPage({
                         </div>
                         <div className="mt-4 flex items-center gap-2 text-sm text-success bg-success/10 w-fit px-2 py-1 rounded-lg">
                             <ArrowUpRight className="w-4 h-4" />
-                            <span>+0% vs mes anterior</span>
+                            <span>Disponible</span>
                         </div>
                     </div>
                 </div>
@@ -170,7 +171,7 @@ export default async function DashboardPage({
                             <span className="text-muted font-medium">Ahorro Total</span>
                         </div>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-foreground">€{savingsAnalysis.totalAhorrado.toFixed(2)}</span>
+                            <span className="text-3xl font-bold text-foreground">€{savingsAnalysis.accumulatedSavings.toFixed(2)}</span>
                         </div>
                         <div className="mt-4 flex items-center gap-2 text-sm text-secondary bg-secondary/10 w-fit px-2 py-1 rounded-lg">
                             <span>{savingsAnalysis.percentageSaved.toFixed(1)}% de ingresos</span>

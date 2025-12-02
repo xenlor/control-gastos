@@ -79,6 +79,8 @@ model Ingreso {
   
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  prestamo    Prestamo?
 
   createdAt   DateTime @default(now())
 }
@@ -96,6 +98,8 @@ model Gasto {
   
   userId         String?
   user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  prestamo       Prestamo?
 
   createdAt      DateTime  @default(now())
 }
@@ -107,6 +111,12 @@ model Prestamo {
   fechaPrestamo   DateTime @default(now())
   fechaRecordatorio DateTime
   pagado          Boolean  @default(false)
+  
+  gastoId         Int?     @unique
+  gasto           Gasto?   @relation(fields: [gastoId], references: [id])
+  
+  ingresoId       Int?     @unique
+  ingreso         Ingreso? @relation(fields: [ingresoId], references: [id])
   
   userId          String?
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)

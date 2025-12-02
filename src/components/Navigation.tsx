@@ -22,11 +22,17 @@ import { logout } from '@/app/actions/auth'
 const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/ingresos', icon: TrendingUp, label: 'Ingresos' },
-    { href: '/gastos', icon: TrendingDown, label: 'Gastos' },
+    {
+        href: '/gastos',
+        icon: TrendingDown,
+        label: 'Gastos',
+        submenu: [
+            { href: '/gastos-compartidos', icon: Users, label: 'Compartidos' }
+        ]
+    },
     { href: '/ahorros', icon: PiggyBank, label: 'Ahorros' },
     { href: '/prestamos', icon: HandCoins, label: 'Préstamos' },
     { href: '/plazos', icon: CreditCard, label: 'Plazos' },
-    { href: '/gastos-compartidos', icon: Users, label: 'Compartidos' },
 ]
 
 interface NavigationProps {
@@ -59,8 +65,55 @@ export default function Navigation({ userRole }: NavigationProps) {
                             <div className="flex items-center gap-1 overflow-x-auto scrollbar-thin w-full px-2">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
-                                    const isActive = pathname === item.href
+                                    const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
 
+                                    if ('submenu' in item && item.submenu) {
+                                        // Dropdown item
+                                        return (
+                                            <div key={item.href} className="relative group">
+                                                <Link
+                                                    href={item.href}
+                                                    className={`
+                                                        flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium shrink-0 whitespace-nowrap
+                                                        ${isActive
+                                                            ? 'text-primary bg-primary/10'
+                                                            : 'text-muted hover:text-foreground hover:bg-white/5'
+                                                        }
+                                                    `}
+                                                >
+                                                    <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                                                    <span className="text-sm tracking-wide">{item.label}</span>
+                                                </Link>
+                                                {/* Dropdown Menu */}
+                                                <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-50 min-w-[180px]">
+                                                    <div className="bg-card/95 backdrop-blur-md border border-border rounded-xl shadow-lg overflow-hidden">
+                                                        {item.submenu.map((subItem) => {
+                                                            const SubIcon = subItem.icon
+                                                            const isSubActive = pathname === subItem.href
+                                                            return (
+                                                                <Link
+                                                                    key={subItem.href}
+                                                                    href={subItem.href}
+                                                                    className={`
+                                                                        flex items-center gap-3 px-4 py-3 transition-colors
+                                                                        ${isSubActive
+                                                                            ? 'text-primary bg-primary/10'
+                                                                            : 'text-muted hover:text-foreground hover:bg-white/5'
+                                                                        }
+                                                                    `}
+                                                                >
+                                                                    <SubIcon className="w-4 h-4" />
+                                                                    <span className="text-sm font-medium">{subItem.label}</span>
+                                                                </Link>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
+
+                                    // Regular item
                                     return (
                                         <Link
                                             key={item.href}

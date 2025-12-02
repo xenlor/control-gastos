@@ -161,6 +161,7 @@ export async function addGastoCompartido(formData: FormData) {
                         fecha,
                         esCompartido: true,
                         gastoCompartidoId: gastoCompartido.id,
+                        userId: user.id,
                     },
                 })
             }
@@ -274,6 +275,7 @@ export async function updateGastoCompartido(id: number, formData: FormData) {
                         // Let's fetch the original date first.
                         esCompartido: true,
                         gastoCompartidoId: id,
+                        userId: user.id,
                     },
                 })
             }
