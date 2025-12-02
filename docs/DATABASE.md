@@ -77,6 +77,59 @@ erDiagram
         int id PK
         string descripcion
         float montoTotal
+        datetime fecha
+    }
+
+    Prestamo {
+        int id PK
+        string persona
+        float monto
+        datetime fechaPrestamo
+        datetime fechaRecordatorio
+        boolean pagado
+    }
+
+    Ahorro {
+        int id PK
+        float monto
+        string descripcion
+        datetime fecha
+    }
+
+    Plazo {
+        int id PK
+        string descripcion
+        float montoTotal
+        int totalCuotas
+        int cuotasPagadas
+        float montoCuota
+        datetime fechaInicio
+        string estado
+    }
+
+    Miembro {
+        int id PK
+        string nombre
+        float ingresoMensual
+        boolean esUsuario
+    }
+
+    Configuracion {
+        int id PK
+        float porcentajeAhorro
+    }
+
+    Session {
+        string id PK
+        string sessionToken
+        datetime expires
+    }
+
+    MiembroGastoCompartido {
+        int id PK
+        string nombre
+        float ingresoMensual
+        boolean esUsuario
     }
 ```
 
