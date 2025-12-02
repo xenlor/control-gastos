@@ -2,57 +2,54 @@
 
 # Colores
 GREEN='\033[0;32m'
+BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # Sin color
+NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Restaurar Base de Datos ===${NC}"
+# Nombre del contenedor de la base de datos
+DB_CONTAINER="gastos-db"
 
-# Configuración
+# Directorio de backups
 BACKUP_DIR="./backups"
 
-# Verificar si hay backups disponibles
-if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR/*.sql 2>/dev/null)" ]; then
-    echo -e "${RED}✗ No hay backups disponibles${NC}"
+echo -e "${BLUE}🔄 Restauración de base de datos${NC}"
+
+# Listar backups disponibles
+if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR)" ]; then
+    echo -e "${RED}❌ No se encontraron backups en $BACKUP_DIR${NC}"
     exit 1
 fi
 
-# Listar backups disponibles
-echo -e "${YELLOW}Backups disponibles:${NC}"
-select BACKUP_FILE in $BACKUP_DIR/backup_*.sql; do
+echo -e "${BLUE}📁 Backups disponibles:${NC}"
+select BACKUP_FILE in "$BACKUP_DIR"/*.sql; do
     if [ -n "$BACKUP_FILE" ]; then
         break
     else
-        echo -e "${RED}Opción inválida${NC}"
+        echo -e "${YELLOW}Selección inválida. Inténtalo de nuevo.${NC}"
     fi
 done
 
-# Obtener variables de entorno
-if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | xargs)
-fi
-
-# Extraer información de DATABASE_URL
-DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-DB_PASS=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
-DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
-DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
-DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-
-echo -e "${YELLOW}¿Estás seguro de restaurar desde $BACKUP_FILE? (y/n)${NC}"
-read -r confirmation
-
-if [ "$confirmation" != "y" ]; then
-    echo -e "${RED}Cancelado${NC}"
+echo -e "${YELLOW}⚠️  ADVERTENCIA: Esto sobrescribirá la base de datos actual${NC}"
+read -p "¿Estás seguro de que deseas continuar? (s/N): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+    echo -e "${BLUE}Operación cancelada${NC}"
     exit 0
 fi
 
-echo -e "${YELLOW}Restaurando...${NC}"
-PGPASSWORD=$DB_PASS psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME < "$BACKUP_FILE"
+echo -e "${BLUE}🔄 Restaurando desde: $BACKUP_FILE${NC}"
+
+# Eliminar la base de datos existente y recrearla
+docker exec $DB_CONTAINER psql -U postgres -c "DROP DATABASE IF EXISTS gastos;"
+docker exec $DB_CONTAINER psql -U postgres -c "CREATE DATABASE gastos;"
+
+# Restaurar el backup
+docker exec -i $DB_CONTAINER psql -U postgres gastos < "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Base de datos restaurada correctamente${NC}"
+    echo -e "${GREEN}✅ Restauración completada exitosamente${NC}"
 else
-    echo -e "${RED}✗ Error al restaurar la base de datos${NC}"
+    echo -e "${RED}❌ Error al restaurar el backup${NC}"
     exit 1
 fi

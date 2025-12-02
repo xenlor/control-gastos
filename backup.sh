@@ -2,41 +2,34 @@
 
 # Colores
 GREEN='\033[0;32m'
+BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # Sin color
+NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Backup de Base de Datos ===${NC}"
+# Nombre del contenedor de la base de datos
+DB_CONTAINER="gastos-db"
 
-# Configuración
+# Directorio de backups
 BACKUP_DIR="./backups"
+mkdir -p "$BACKUP_DIR"
+
+# Nombre del archivo de backup con fecha
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="$BACKUP_DIR/backup_$TIMESTAMP.sql"
 
-# Crear directorio de backups si no existe
-mkdir -p "$BACKUP_DIR"
+echo -e "${BLUE}📦 Iniciando backup de la base de datos...${NC}"
 
-# Obtener variables de entorno
-if [ -f .env ]; then
-    export $(cat .env | grep -v '^#' | xargs)
-fi
-
-# Extraer información de DATABASE_URL
-DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-DB_PASS=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
-DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
-DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
-DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
-
-echo -e "${YELLOW}Creando backup...${NC}"
-PGPASSWORD=$DB_PASS pg_dump -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME > "$BACKUP_FILE"
+# Realizar el backup
+docker exec $DB_CONTAINER pg_dump -U postgres gastos > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Backup creado: $BACKUP_FILE${NC}"
+    echo -e "${GREEN}✅ Backup completado exitosamente${NC}"
+    echo -e "${GREEN}📁 Archivo: $BACKUP_FILE${NC}"
     
-    # Mantener solo los últimos 7 backups
-    ls -t $BACKUP_DIR/backup_*.sql | tail -n +8 | xargs -r rm
-    echo -e "${YELLOW}Backups antiguos eliminados (manteniendo los últimos 7)${NC}"
+    # Mostrar tamaño del backup
+    SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+    echo -e "${BLUE}📊 Tamaño: $SIZE${NC}"
 else
-    echo -e "${RED}✗ Error al crear backup${NC}"
+    echo -e "${YELLOW}❌ Error al crear el backup${NC}"
     exit 1
 fi
