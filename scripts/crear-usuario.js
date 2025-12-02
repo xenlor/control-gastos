@@ -1,54 +1,51 @@
-const { PrismaClient } = require('@prisma/client')
-const bcrypt = require('bcryptjs')
-const readline = require('readline')
-
-const prisma = new PrismaClient()
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-
-const question = (query) => new Promise((resolve) => rl.question(query, resolve))
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+const prisma = new PrismaClient();
 
 async function main() {
-    console.log('--- Creador de Usuarios ---')
+    const email = process.argv[2];
+    const password = process.argv[3];
+    const name = process.argv[4] || 'Usuario Test';
+
+    if (!email || !password) {
+        console.log('❌ Uso: node scripts/crear-usuario.js <email> <password> [nombre]');
+        process.exit(1);
+    }
 
     try {
-        const name = await question('Nombre: ')
-        const email = await question('Email: ')
-        const password = await question('Contraseña: ')
-
-        if (!name || !email || !password) {
-            console.error('Error: Todos los campos son obligatorios.')
-            process.exit(1)
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await prisma.user.create({
             data: {
-                name,
                 email,
                 password: hashedPassword,
-            },
-        })
+                name,
+                image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+                // Create default config for the user
+                configuracion: {
+                    create: {
+                        porcentajeAhorro: 20.0
+                    }
+                }
+            }
+        });
 
-        console.log(`\n✅ Usuario creado exitosamente:`)
-        console.log(`Nombre: ${user.name}`)
-        console.log(`Email: ${user.email}`)
-        console.log(`ID: ${user.id}`)
+        console.log('\n✅ Usuario creado exitosamente:');
+        console.log(`   ID: ${user.id}`);
+        console.log(`   Email: ${user.email}`);
+        console.log(`   Nombre: ${user.name}`);
+        console.log(`   Password: ${password} (Guardada como hash)`);
+        console.log(`   Configuración: Creada por defecto (20%)`);
 
-    } catch (e) {
-        if (e.code === 'P2002') {
-            console.error('\n❌ Error: Ya existe un usuario con ese email.')
+    } catch (error) {
+        if (error.code === 'P2002') {
+            console.log('\n❌ Error: Ya existe un usuario con ese email.');
         } else {
-            console.error('\n❌ Error desconocido:', e)
+            console.error('\n❌ Error al crear usuario:', error);
         }
     } finally {
-        await prisma.$disconnect()
-        rl.close()
+        await prisma.$disconnect();
     }
 }
 
-main()
+main();

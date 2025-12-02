@@ -2,10 +2,12 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function getAhorros(month?: number, year?: number) {
     try {
-        const where: any = {}
+        const user = await getCurrentUser()
+        const where: any = { userId: user.id }
 
         if (month !== undefined && year !== undefined) {
             const startDate = new Date(year, month, 1)
@@ -30,6 +32,7 @@ export async function getAhorros(month?: number, year?: number) {
 
 export async function addAhorro(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const descripcion = formData.get('descripcion') as string
         const monto = parseFloat(formData.get('monto') as string)
         const fechaStr = formData.get('fecha') as string
@@ -44,6 +47,7 @@ export async function addAhorro(formData: FormData) {
                 descripcion,
                 monto,
                 fecha,
+                userId: user.id,
             },
         })
 
@@ -58,9 +62,17 @@ export async function addAhorro(formData: FormData) {
 
 export async function deleteAhorro(id: number) {
     try {
-        await prisma.ahorro.delete({
-            where: { id },
+        const user = await getCurrentUser()
+        const result = await prisma.ahorro.deleteMany({
+            where: {
+                id,
+                userId: user.id
+            },
         })
+
+        if (result.count === 0) {
+            return { success: false, error: 'Ahorro no encontrado o no tienes permisos' }
+        }
 
         revalidatePath('/ahorros')
         revalidatePath('/')
@@ -73,12 +85,14 @@ export async function deleteAhorro(id: number) {
 
 export async function getSavingsAnalysis(month: number, year: number) {
     try {
+        const user = await getCurrentUser()
         const startDate = new Date(year, month, 1)
         const endDate = new Date(year, month + 1, 0, 23, 59, 59)
 
         const [ingresos, ahorros] = await Promise.all([
             prisma.ingreso.aggregate({
                 where: {
+                    userId: user.id,
                     fecha: {
                         gte: startDate,
                         lte: endDate
@@ -88,6 +102,7 @@ export async function getSavingsAnalysis(month: number, year: number) {
             }),
             prisma.ahorro.aggregate({
                 where: {
+                    userId: user.id,
                     fecha: {
                         gte: startDate,
                         lte: endDate
@@ -99,7 +114,14 @@ export async function getSavingsAnalysis(month: number, year: number) {
 
         const totalIngresos = ingresos._sum.monto || 0
         const totalAhorrado = ahorros._sum.monto || 0
-        const targetAhorro = totalIngresos * 0.20 // 20% target
+
+        // Get user configuration for savings percentage
+        const config = await prisma.configuracion.findUnique({
+            where: { userId: user.id }
+        })
+        const porcentaje = config?.porcentajeAhorro || 20.0
+
+        const targetAhorro = totalIngresos * (porcentaje / 100)
 
         return {
             totalIngresos,

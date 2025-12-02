@@ -30,6 +30,8 @@ model User {
   ahorros           Ahorro[]
   categorias        Categoria[]
   plazos            Plazo[]
+  miembros          Miembro[]
+  configuracion     Configuracion?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -74,14 +76,18 @@ model VerificationToken {
 
 model Configuracion {
   id                 Int      @id @default(autoincrement())
-  porcentajeAhorro   Float    @default(0.0)
+  porcentajeAhorro   Float    @default(20.0)
+  
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
 
 model Categoria {
   id          Int      @id @default(autoincrement())
-  nombre      String   @unique
+  nombre      String
   color       String   @default("#6366f1")
   icono       String?
   createdAt   DateTime @default(now())
@@ -89,6 +95,8 @@ model Categoria {
   
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])
+
+  @@unique([nombre, userId])
 }
 
 model Ingreso {
@@ -181,6 +189,10 @@ model Miembro {
   nombre         String
   ingresoMensual Float
   esUsuario      Boolean  @default(false)
+  
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

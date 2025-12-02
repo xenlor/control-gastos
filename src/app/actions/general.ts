@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/auth'
 
 export type AvailableDate = {
     month: number
@@ -10,13 +11,16 @@ export type AvailableDate = {
 
 export async function getAvailableMonths(): Promise<AvailableDate[]> {
     try {
+        const user = await getCurrentUser()
         // Fetch all dates from expenses and incomes
         const [gastos, ingresos] = await Promise.all([
             prisma.gasto.findMany({
+                where: { userId: user.id },
                 select: { fecha: true },
                 orderBy: { fecha: 'desc' }
             }),
             prisma.ingreso.findMany({
+                where: { userId: user.id },
                 select: { fecha: true },
                 orderBy: { fecha: 'desc' }
             })

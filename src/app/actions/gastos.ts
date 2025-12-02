@@ -2,9 +2,11 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function getGastos(month?: number, year?: number, categoryIds?: number[]) {
-    const where: any = {}
+    const user = await getCurrentUser()
+    const where: any = { userId: user.id }
 
     if (month !== undefined && year !== undefined) {
         const startDate = new Date(year, month, 1)
@@ -34,7 +36,9 @@ export async function getGastos(month?: number, year?: number, categoryIds?: num
 }
 
 export async function getCategorias() {
+    const user = await getCurrentUser()
     return await prisma.categoria.findMany({
+        where: { userId: user.id },
         orderBy: {
             nombre: 'asc',
         },
@@ -42,6 +46,7 @@ export async function getCategorias() {
 }
 
 export async function addGasto(formData: FormData) {
+    const user = await getCurrentUser()
     const monto = parseFloat(formData.get('monto') as string)
     const descripcion = formData.get('descripcion') as string
     const categoriaId = parseInt(formData.get('categoriaId') as string)
@@ -58,6 +63,7 @@ export async function addGasto(formData: FormData) {
                 descripcion,
                 categoriaId,
                 fecha,
+                userId: user.id,
             },
         })
         revalidatePath('/gastos')
@@ -72,10 +78,19 @@ export async function addGasto(formData: FormData) {
 export async function deleteGasto(id: number) {
     try {
         // Check if this gasto is linked to a shared expense
-        const gasto = await prisma.gasto.findUnique({
-            where: { id },
+        const user = await getCurrentUser()
+        // Check if this gasto is linked to a shared expense AND belongs to user
+        const gasto = await prisma.gasto.findFirst({
+            where: {
+                id,
+                userId: user.id
+            },
             select: { gastoCompartidoId: true }
         })
+
+        if (!gasto) {
+            return { success: false, error: 'Gasto no encontrado o no tienes permisos' }
+        }
 
         if (gasto?.gastoCompartidoId) {
             // If linked, delete the shared expense (which will cascade delete this gasto)
@@ -100,6 +115,7 @@ export async function deleteGasto(id: number) {
 }
 
 export async function addCategoria(formData: FormData) {
+    const user = await getCurrentUser()
     const nombre = formData.get('nombre') as string
     const color = formData.get('color') as string || '#6366f1'
 
@@ -112,7 +128,8 @@ export async function addCategoria(formData: FormData) {
             data: {
                 nombre,
                 color,
-                icono: 'Tag'
+                icono: 'Tag',
+                userId: user.id,
             },
         })
         revalidatePath('/gastos')

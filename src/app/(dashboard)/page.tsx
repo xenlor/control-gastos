@@ -21,6 +21,7 @@ import { getAvailableMonths } from '@/app/actions/general'
 import { getSavingsAnalysis } from '@/app/actions/ahorros'
 import { DownloadReportButton } from '@/components/DownloadReportButton'
 import { NewTransactionButton } from '@/components/NewTransactionButton'
+import { getCurrentUser } from '@/lib/auth'
 
 export default async function DashboardPage({
     searchParams,
@@ -31,6 +32,7 @@ export default async function DashboardPage({
     const month = resolvedSearchParams.month ? parseInt(resolvedSearchParams.month as string) : new Date().getMonth()
     const year = resolvedSearchParams.year ? parseInt(resolvedSearchParams.year as string) : new Date().getFullYear()
 
+    const user = await getCurrentUser()
     const [ingresos, gastos, availableMonths, savingsAnalysis] = await Promise.all([
         getIngresos(month, year),
         getGastos(month, year),
@@ -73,7 +75,7 @@ export default async function DashboardPage({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 tracking-tight">
-                        Hola, <span className="text-gradient-primary">Esteban</span>
+                        Hola, <span className="text-gradient-primary">{user.name || 'Usuario'}</span>
                     </h1>
                     <p className="text-muted text-lg">Aquí está el resumen de tus finanzas este mes.</p>
                 </div>

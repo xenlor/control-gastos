@@ -2,10 +2,13 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function getPrestamos() {
     try {
+        const user = await getCurrentUser()
         const prestamos = await prisma.prestamo.findMany({
+            where: { userId: user.id },
             orderBy: {
                 fechaPrestamo: 'desc',
             },
@@ -19,6 +22,7 @@ export async function getPrestamos() {
 
 export async function addPrestamo(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const persona = formData.get('persona') as string
         const monto = parseFloat(formData.get('monto') as string)
         const fechaPrestamo = new Date(formData.get('fechaPrestamo') as string)
@@ -35,6 +39,7 @@ export async function addPrestamo(formData: FormData) {
                 fechaPrestamo,
                 fechaRecordatorio,
                 pagado: false,
+                userId: user.id,
             },
         })
 

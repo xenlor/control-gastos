@@ -2,10 +2,13 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function getPlazos() {
     try {
+        const user = await getCurrentUser()
         const plazos = await prisma.plazo.findMany({
+            where: { userId: user.id },
             orderBy: {
                 fechaInicio: 'desc',
             },
@@ -19,6 +22,7 @@ export async function getPlazos() {
 
 export async function addPlazo(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const descripcion = formData.get('descripcion') as string
         const montoTotal = parseFloat(formData.get('montoTotal') as string)
         const totalCuotas = parseInt(formData.get('totalCuotas') as string)
@@ -38,6 +42,7 @@ export async function addPlazo(formData: FormData) {
                 montoCuota,
                 fechaInicio,
                 cuotasPagadas: formData.get('cuotasPagadas') ? parseInt(formData.get('cuotasPagadas') as string) : 0,
+                userId: user.id,
             },
         })
 
@@ -52,6 +57,7 @@ export async function addPlazo(formData: FormData) {
 
 export async function payCuota(id: number) {
     try {
+        const user = await getCurrentUser()
         const plazo = await prisma.plazo.findUnique({ where: { id } })
 
         if (!plazo) return { success: false, error: 'Plazo no encontrado' }
@@ -66,16 +72,17 @@ export async function payCuota(id: number) {
 
         // Create expense for this payment
         // 1. Find or create "Compras a plazos" category
-        let categoria = await prisma.categoria.findUnique({
-            where: { nombre: 'Compras a plazos' }
+        let categoria = await prisma.categoria.findFirst({
+            where: { nombre: 'Compras a plazos', userId: user.id }
         })
 
         if (!categoria) {
             categoria = await prisma.categoria.create({
                 data: {
                     nombre: 'Compras a plazos',
-                    color: '#f59e0b', // Amber/Orange
-                    icono: 'CreditCard'
+                    color: '#8b5cf6',
+                    icono: 'CreditCard',
+                    userId: user.id,
                 }
             })
         }
@@ -87,6 +94,7 @@ export async function payCuota(id: number) {
                 descripcion: `Cuota ${updatedPlazo.cuotasPagadas} de ${plazo.totalCuotas} - ${plazo.descripcion}`,
                 categoriaId: categoria.id,
                 fecha: new Date(),
+                userId: user.id,
             }
         })
 

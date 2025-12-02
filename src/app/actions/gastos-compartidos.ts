@@ -2,12 +2,15 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 // --- Miembros ---
 
 export async function getMiembros() {
     try {
+        const user = await getCurrentUser()
         const miembros = await prisma.miembro.findMany({
+            where: { userId: user.id },
             orderBy: { createdAt: 'asc' },
         })
         return miembros
@@ -19,6 +22,7 @@ export async function getMiembros() {
 
 export async function addMiembro(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const nombre = formData.get('nombre') as string
         const ingresoMensual = parseFloat(formData.get('ingresoMensual') as string)
         const esUsuario = formData.get('esUsuario') === 'on'
@@ -32,6 +36,7 @@ export async function addMiembro(formData: FormData) {
                 nombre,
                 ingresoMensual,
                 esUsuario,
+                userId: user.id,
             },
         })
 
@@ -61,7 +66,8 @@ export async function deleteMiembro(id: number) {
 
 export async function getGastosCompartidos(month?: number, year?: number) {
     try {
-        const where: any = {}
+        const user = await getCurrentUser()
+        const where: any = { userId: user.id }
 
         if (month !== undefined && year !== undefined) {
             const startDate = new Date(year, month, 1)
@@ -89,6 +95,7 @@ export async function getGastosCompartidos(month?: number, year?: number) {
 
 export async function addGastoCompartido(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const descripcion = formData.get('descripcion') as string
         const montoTotal = parseFloat(formData.get('montoTotal') as string)
         const fecha = new Date()
@@ -98,7 +105,9 @@ export async function addGastoCompartido(formData: FormData) {
         }
 
         // 1. Fetch current members to calculate split
-        const miembros = await prisma.miembro.findMany()
+        const miembros = await prisma.miembro.findMany({
+            where: { userId: user.id }
+        })
         if (miembros.length === 0) {
             return { success: false, error: 'No hay miembros registrados para dividir el gasto' }
         }
@@ -114,6 +123,7 @@ export async function addGastoCompartido(formData: FormData) {
                 descripcion,
                 montoTotal,
                 fecha,
+                userId: user.id,
             },
         })
 
@@ -136,7 +146,7 @@ export async function addGastoCompartido(formData: FormData) {
             // If this member is the main user, create a Gasto record
             if (miembro.esUsuario) {
                 // Find or create 'Gastos Compartidos' category
-                let categoria = await prisma.categoria.findUnique({ where: { nombre: 'Gastos Compartidos' } })
+                let categoria = await prisma.categoria.findFirst({ where: { nombre: 'Gastos Compartidos' } })
                 if (!categoria) {
                     categoria = await prisma.categoria.create({
                         data: { nombre: 'Gastos Compartidos', color: '#ec4899', icono: 'Users' },
@@ -181,6 +191,7 @@ export async function deleteGastoCompartido(id: number) {
 }
 export async function updateGastoCompartido(id: number, formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const descripcion = formData.get('descripcion') as string
         const montoTotal = parseFloat(formData.get('montoTotal') as string)
         const miembrosIds = JSON.parse(formData.get('miembrosIds') as string) as number[]
@@ -191,7 +202,10 @@ export async function updateGastoCompartido(id: number, formData: FormData) {
 
         // 1. Fetch selected members
         const miembros = await prisma.miembro.findMany({
-            where: { id: { in: miembrosIds } }
+            where: {
+                id: { in: miembrosIds },
+                userId: user.id
+            }
         })
 
         if (miembros.length === 0) {
@@ -242,7 +256,7 @@ export async function updateGastoCompartido(id: number, formData: FormData) {
             })
 
             if (miembro.esUsuario) {
-                let categoria = await prisma.categoria.findUnique({ where: { nombre: 'Gastos Compartidos' } })
+                let categoria = await prisma.categoria.findFirst({ where: { nombre: 'Gastos Compartidos' } })
                 if (!categoria) {
                     categoria = await prisma.categoria.create({
                         data: { nombre: 'Gastos Compartidos', color: '#ec4899', icono: 'Users' },

@@ -2,10 +2,12 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function getIngresos(month?: number, year?: number) {
     try {
-        const where: any = {}
+        const user = await getCurrentUser()
+        const where: any = { userId: user.id }
 
         if (month !== undefined && year !== undefined) {
             const startDate = new Date(year, month, 1)
@@ -30,6 +32,7 @@ export async function getIngresos(month?: number, year?: number) {
 
 export async function addIngreso(formData: FormData) {
     try {
+        const user = await getCurrentUser()
         const monto = parseFloat(formData.get('monto') as string)
         const descripcion = formData.get('descripcion') as string
         const fecha = formData.get('fecha') as string
@@ -43,6 +46,7 @@ export async function addIngreso(formData: FormData) {
                 monto,
                 descripcion,
                 fecha: fecha ? new Date(fecha) : new Date(),
+                userId: user.id,
             },
         })
 
@@ -57,9 +61,17 @@ export async function addIngreso(formData: FormData) {
 
 export async function deleteIngreso(id: number) {
     try {
-        await prisma.ingreso.delete({
-            where: { id },
+        const user = await getCurrentUser()
+        const result = await prisma.ingreso.deleteMany({
+            where: {
+                id,
+                userId: user.id
+            },
         })
+
+        if (result.count === 0) {
+            return { success: false, error: 'Ingreso no encontrado o no tienes permisos' }
+        }
 
         revalidatePath('/ingresos')
         revalidatePath('/')
@@ -72,12 +84,14 @@ export async function deleteIngreso(id: number) {
 
 export async function getTotalIngresos() {
     try {
+        const user = await getCurrentUser()
         const currentMonth = new Date()
         currentMonth.setDate(1)
         currentMonth.setHours(0, 0, 0, 0)
 
         const ingresos = await prisma.ingreso.findMany({
             where: {
+                userId: user.id,
                 fecha: {
                     gte: currentMonth,
                 },
