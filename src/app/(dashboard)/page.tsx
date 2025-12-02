@@ -101,7 +101,7 @@ export default async function DashboardPage({
             </div>
 
             {/* Summary Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 {/* Balance Card */}
                 <div className="glass-card p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -176,13 +176,34 @@ export default async function DashboardPage({
                             <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary">
                                 <PiggyBank className="w-6 h-6" />
                             </div>
-                            <span className="text-muted font-medium">Ahorro Total</span>
+                            <span className="text-muted font-medium">Ahorros</span>
                         </div>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-foreground">€{savingsAnalysis.accumulatedSavings.toFixed(2)}</span>
+                            <span className="text-3xl font-bold text-foreground">€{savingsAnalysis.totalAhorrado.toFixed(2)}</span>
                         </div>
-                        <div className="mt-4 flex items-center gap-2 text-sm text-secondary bg-secondary/10 w-fit px-2 py-1 rounded-lg">
-                            <span>{savingsAnalysis.percentageSaved.toFixed(1)}% de ingresos</span>
+                        <div className="mt-4 flex items-center gap-2 text-sm text-muted">
+                            <span>Este mes</span>
+                        </div>
+                    </div>
+                </Link>
+
+                {/* Investments Card */}
+                <Link href="/inversiones" className="glass-card p-6 relative overflow-hidden group hover:ring-2 hover:ring-primary/50 transition-all">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <TrendingUp className="w-24 h-24 text-primary" />
+                    </div>
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                                <TrendingUp className="w-6 h-6" />
+                            </div>
+                            <span className="text-muted font-medium">Inversiones</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-foreground">€{investmentSummary.invertidoEsteMes.toFixed(2)}</span>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-sm text-muted">
+                            <span>Este mes</span>
                         </div>
                     </div>
                 </Link>
