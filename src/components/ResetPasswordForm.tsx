@@ -9,6 +9,19 @@ export function ResetPasswordForm({ userId, userName }: { userId: string, userNa
     const [newPassword, setNewPassword] = useState('')
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
     const containerRef = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const [position, setPosition] = useState({ top: 0, right: 0 })
+
+    // Calculate position when opening
+    useEffect(() => {
+        if (isOpen && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect()
+            setPosition({
+                top: rect.bottom + 8,
+                right: window.innerWidth - rect.right
+            })
+        }
+    }, [isOpen])
 
     // Close on click outside
     useEffect(() => {
@@ -43,6 +56,7 @@ export function ResetPasswordForm({ userId, userName }: { userId: string, userNa
     return (
         <div className="relative" ref={containerRef}>
             <button
+                ref={buttonRef}
                 onClick={() => setIsOpen(!isOpen)}
                 className="p-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded-md transition-colors"
                 title="Resetear contraseña"
@@ -51,7 +65,10 @@ export function ResetPasswordForm({ userId, userName }: { userId: string, userNa
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 mt-2 p-4 bg-card/95 backdrop-blur-md border border-border rounded-xl shadow-lg w-64 right-0">
+                <div
+                    className="fixed z-[9999] p-4 bg-card/95 backdrop-blur-md border border-border rounded-xl shadow-lg w-64"
+                    style={{ top: `${position.top}px`, right: `${position.right}px` }}
+                >
                     <h3 className="text-sm font-medium text-foreground mb-2">Nueva contraseña para {userName}</h3>
                     <form onSubmit={handleSubmit} className="space-y-2">
                         <input
