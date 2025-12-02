@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const readline = require('readline');
 
 const prisma = new PrismaClient();
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -13,58 +14,70 @@ async function main() {
     try {
         // 1. Fetch all users
         const users = await prisma.user.findMany({
-            select: { id: true, email: true, name: true },
-            orderBy: { email: 'asc' }
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                role: true
+            },
+            orderBy: {
+                username: "asc"
+            }
         });
 
         if (users.length === 0) {
-            console.log('❌ No hay usuarios registrados en la base de datos.');
-            return;
+            console.log('❌ No hay usuarios en la base de datos.\n');
+            process.exit(0);
         }
 
         // 2. Display users
-        console.log('Seleccione el usuario a eliminar:');
+        console.log('📋 Usuarios disponibles:\n');
         users.forEach((user, index) => {
-            console.log(`   [${index + 1}] ${user.email} (${user.name || 'Sin nombre'})`);
+            console.log(`   ${index + 1}. ${user.username} (${user.name}) - ${user.role}`);
         });
-        console.log('   [0] Cancelar\n');
 
-        // 3. Ask for selection
-        rl.question('Opción: ', async (answer) => {
-            const selection = parseInt(answer);
+        // 3. Ask for user to delete
+        rl.question('\n🔢 Ingresa el número del usuario a eliminar (0 para cancelar): ', async (input) => {
+            const choice = parseInt(input);
 
-            if (isNaN(selection) || selection < 0 || selection > users.length) {
-                console.log('\n❌ Opción inválida.');
-                rl.close();
-                return;
-            }
-
-            if (selection === 0) {
-                console.log('\nOperación cancelada.');
-                rl.close();
-                return;
-            }
-
-            const selectedUser = users[selection - 1];
-
-            // 4. Confirm deletion
-            console.log(`\n⚠️  ADVERTENCIA: Se eliminará al usuario ${selectedUser.email} y TODOS sus datos.`);
-            rl.question('¿Está seguro? (escriba "si" para confirmar): ', async (confirm) => {
-                if (confirm.toLowerCase() === 'si') {
-                    try {
-                        console.log('\nEliminando...');
-                        await prisma.user.delete({
-                            where: { id: selectedUser.id }
-                        });
-                        console.log('✅ Usuario eliminado exitosamente.');
-                    } catch (error) {
-                        console.error('\n❌ Error al eliminar:', error.message);
-                    }
-                } else {
-                    console.log('\nOperación cancelada.');
-                }
+            if (choice === 0) {
+                console.log('\n✅ Operación cancelada.\n');
                 rl.close();
                 await prisma.$disconnect();
+                process.exit(0);
+            }
+
+            if (isNaN(choice) || choice < 1 || choice > users.length) {
+                console.log('\n❌ Opción inválida.\n');
+                rl.close();
+                await prisma.$disconnect();
+                process.exit(1);
+            }
+
+            const selectedUser = users[choice - 1];
+
+            // 4. Confirmation
+            rl.question(`\n⚠️  ¿Estás seguro de eliminar a "${selectedUser.username}" (${selectedUser.name})? (s/n): `, async (confirmation) => {
+                if (confirmation.toLowerCase() !== 's') {
+                    console.log('\n✅ Operación cancelada.\n');
+                    rl.close();
+                    await prisma.$disconnect();
+                    process.exit(0);
+                }
+
+                try {
+                    // 5. Delete user (cascade will handle related records)
+                    await prisma.user.delete({
+                        where: { id: selectedUser.id }
+                    });
+
+                    console.log(`\n✅ Usuario "${selectedUser.username}" eliminado exitosamente.\n`);
+                } catch (error) {
+                    console.error('\n❌ Error al eliminar usuario:', error.message);
+                } finally {
+                    rl.close();
+                    await prisma.$disconnect();
+                }
             });
         });
 
@@ -72,6 +85,7 @@ async function main() {
         console.error('\n❌ Error:', error);
         rl.close();
         await prisma.$disconnect();
+        process.exit(1);
     }
 }
 
