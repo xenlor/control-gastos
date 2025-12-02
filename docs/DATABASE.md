@@ -24,6 +24,62 @@ La aplicación utiliza PostgreSQL como base de datos relacional y Prisma como OR
 ### Configuración
 - **Configuracion**: Preferencias del usuario (ej: porcentaje de ahorro objetivo).
 
+## Diagrama Entidad-Relación
+
+```mermaid
+erDiagram
+    User ||--o{ Session : "has"
+    User ||--o{ Gasto : "creates"
+    User ||--o{ Ingreso : "creates"
+    User ||--o{ Prestamo : "creates"
+    User ||--o{ GastoCompartido : "creates"
+    User ||--o{ Ahorro : "creates"
+    User ||--o{ Categoria : "creates"
+    User ||--o{ Plazo : "creates"
+    User ||--o{ Miembro : "creates"
+    User ||--o| Configuracion : "has"
+
+    Gasto }|--|| Categoria : "belongs to"
+    Gasto }|--o| GastoCompartido : "part of"
+    
+    GastoCompartido ||--o{ MiembroGastoCompartido : "includes"
+    GastoCompartido ||--o{ Gasto : "contains"
+    
+    MiembroGastoCompartido }|--|| GastoCompartido : "belongs to"
+
+    User {
+        string id PK
+        string username
+        string role
+    }
+
+    Gasto {
+        int id PK
+        float monto
+        string descripcion
+        int categoriaId FK
+        int gastoCompartidoId FK
+    }
+
+    Ingreso {
+        int id PK
+        float monto
+        string descripcion
+    }
+
+    Categoria {
+        int id PK
+        string nombre
+        string color
+    }
+
+    GastoCompartido {
+        int id PK
+        string descripcion
+        float montoTotal
+    }
+```
+
 ## Relaciones Clave
 - Todos los modelos financieros (`Gasto`, `Ingreso`, etc.) están vinculados a un `User` mediante `userId`, asegurando el aislamiento de datos.
 - Los `Gastos` pueden estar vinculados a un `GastoCompartido` para reflejar la parte proporcional que le corresponde al usuario.
