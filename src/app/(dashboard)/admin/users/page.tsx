@@ -38,19 +38,19 @@ export default async function AdminUsersPage() {
     return (
         <div className="p-8 space-y-8">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">Gestión de Usuarios</h1>
+                <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
             </div>
 
             {/* Users List Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-indigo-400" />
-                    <h2 className="text-xl font-semibold text-white">Usuarios Registrados</h2>
+            <div className="glass-panel rounded-xl overflow-hidden">
+                <div className="p-6 border-b border-border flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <h2 className="text-xl font-semibold text-foreground">Usuarios Registrados</h2>
                 </div>
                 <div className="p-0">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-950/50 text-slate-400">
+                            <thead className="bg-muted/50 text-muted-foreground">
                                 <tr>
                                     <th className="p-4 font-medium">Nombre</th>
                                     <th className="p-4 font-medium">Usuario</th>
@@ -60,23 +60,23 @@ export default async function AdminUsersPage() {
                                     <th className="p-4 font-medium text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800">
+                            <tbody className="divide-y divide-border">
                                 {users.map((u) => (
-                                    <tr key={u.id} className="hover:bg-slate-800/50 transition-colors">
-                                        <td className="p-4 font-medium text-slate-200">{u.name}</td>
-                                        <td className="p-4 text-slate-400">{u.username}</td>
+                                    <tr key={u.id} className="hover:bg-muted/50 transition-colors">
+                                        <td className="p-4 font-medium text-foreground">{u.name}</td>
+                                        <td className="p-4 text-muted-foreground">{u.username}</td>
                                         <td className="p-4">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'ADMIN'
-                                                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                                : 'bg-slate-700 text-slate-300'
+                                                ? 'bg-primary/10 text-primary border border-primary/20'
+                                                : 'bg-secondary/10 text-secondary border border-secondary/20'
                                                 }`}>
                                                 {u.role}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-slate-400">
+                                        <td className="p-4 text-muted-foreground">
                                             {new Date(u.createdAt).toLocaleDateString()}
                                         </td>
-                                        <td className="p-4 text-slate-400 text-xs">
+                                        <td className="p-4 text-muted-foreground text-xs">
                                             {u._count.ingresos} Ingresos, {u._count.gastos} Gastos
                                         </td>
                                         <td className="p-4 text-right flex justify-end items-center gap-2">
@@ -89,7 +89,7 @@ export default async function AdminUsersPage() {
                                                 }}>
                                                     <button
                                                         type="submit"
-                                                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors"
+                                                        className="p-2 text-danger hover:text-danger/80 hover:bg-danger/10 rounded-md transition-colors"
                                                         title="Eliminar usuario"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -106,10 +106,10 @@ export default async function AdminUsersPage() {
             </div>
 
             {/* Create User Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-emerald-400" />
-                    <h2 className="text-xl font-semibold text-white">Crear Nuevo Usuario</h2>
+            <div className="glass-panel rounded-xl max-w-md overflow-hidden">
+                <div className="p-6 border-b border-border flex items-center gap-2">
+                    <UserPlus className="h-5 w-5 text-success" />
+                    <h2 className="text-xl font-semibold text-foreground">Crear Nuevo Usuario</h2>
                 </div>
                 <div className="p-6">
                     <form action={async (formData) => {
@@ -145,14 +145,14 @@ export default async function AdminUsersPage() {
                             required
                         />
                         <div className="space-y-2">
-                            <label htmlFor="role" className="text-sm font-medium text-slate-400 ml-1">Rol</label>
+                            <label htmlFor="role" className="text-sm font-medium text-muted-foreground ml-1">Rol</label>
                             <select
                                 name="role"
                                 id="role"
-                                className="w-full h-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                className="w-full h-12 rounded-xl border border-input bg-background/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                             >
-                                <option value="USER" className="bg-slate-900">Usuario Normal</option>
-                                <option value="ADMIN" className="bg-slate-900">Administrador</option>
+                                <option value="USER" className="bg-background text-foreground">Usuario Normal</option>
+                                <option value="ADMIN" className="bg-background text-foreground">Administrador</option>
                             </select>
                         </div>
                         <SubmitButton loadingText="Creando...">Crear Usuario</SubmitButton>
