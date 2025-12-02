@@ -96,6 +96,10 @@ export async function togglePrestamoPagado(id: number, pagado: boolean) {
             return { success: false, error: 'Préstamo no encontrado' }
         }
 
+        if (!prestamo || prestamo.userId !== user.id) {
+            return { success: false, error: 'Préstamo no encontrado' }
+        }
+
         if (pagado) {
             // Create Ingreso (Loan Repayment)
             const ingreso = await prisma.ingreso.create({
