@@ -84,52 +84,30 @@ Aplicación web moderna para gestión de finanzas personales con dashboard inter
 
 7. **Abrir navegador** en http://localhost:3000
 
-## 🐳 Despliegue en Producción (VPS con Docker)
+## 🐳 Despliegue Fácil (Easy Deploy)
 
-### 1. Preparación del Servidor
+El proyecto incluye un script automatizado para desplegar en cualquier servidor con Docker.
 
-Instalar Docker y Docker Compose:
-```bash
-sudo apt update
-sudo apt install docker.io docker-compose -y
-sudo systemctl enable --now docker
-```
-
-### 2. Despliegue
-
-1. **Clonar el proyecto** en tu servidor:
-   ```bash
+1. **Clonar el repositorio**:
    ```bash
    git clone https://github.com/xenlor/control-gastos.git
    cd control-gastos
    ```
 
-2. **Configurar variables de entorno**:
-   Crea un archivo `.env` con tus credenciales seguras:
-   ```env
-   # Configuración App
-   APP_PORT="3000" # O el puerto que prefieras
-
-   # Base de Datos
-   POSTGRES_USER="usuario_seguro"
-   POSTGRES_PASSWORD="contraseña_muy_segura_123"
-   POSTGRES_DB="control_gastos"
-   DATABASE_URL="postgresql://usuario_seguro:contraseña_muy_segura_123@postgres:5432/control_gastos"
-   
-   # Seguridad
-   AUTH_SECRET="genera_uno_largo_con_openssl_rand_-base64_32"
-   NEXTAUTH_URL="https://tudominio.com"
-   ```
-
-3. **Levantar la aplicación**:
+2. **Ejecutar el script de despliegue**:
    ```bash
-   docker-compose up -d --build
+   chmod +x deploy.sh
+   ./deploy.sh
    ```
 
-4. **Inicializar la base de datos**:
-   ```bash
-   docker-compose exec app npx prisma db push
-   ```
+El script te guiará paso a paso:
+- Verificará dependencias (Docker)
+- Te pedirá configuración (Dominio, Puerto, Contraseña BD)
+- Creará el archivo `.env` automáticamente
+- Levantará los contenedores
+- Inicializará la base de datos y creará el usuario Admin por defecto
+
+¡Y listo! Tu aplicación estará corriendo en el puerto que hayas elegido.
 
 ## 👤 Gestión de Usuarios (Scripts)
 

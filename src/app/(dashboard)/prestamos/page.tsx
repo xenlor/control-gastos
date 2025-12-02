@@ -3,6 +3,8 @@ import { Plus, Calendar, DollarSign, User, Bell, CheckCircle2, XCircle, Trash2 }
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PrestamosPage() {
     const prestamos = await getPrestamos()
 

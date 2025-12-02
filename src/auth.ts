@@ -32,7 +32,10 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-                    if (passwordsMatch) return user;
+                    if (passwordsMatch) {
+                        console.log('Authorize - User found:', user.email, 'Role:', user.role)
+                        return user;
+                    }
                 }
 
                 console.log('Invalid credentials');
@@ -43,13 +46,17 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
+                console.log('JWT Callback - User:', user.role)
                 token.id = user.id;
+                token.role = user.role;
             }
             return token;
         },
         async session({ session, token }) {
+            console.log('Session Callback - Token Role:', token.role)
             if (token.sub && session.user) {
                 session.user.id = token.sub;
+                session.user.role = token.role as string;
             }
             return session;
         },

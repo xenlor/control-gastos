@@ -23,6 +23,7 @@ async function main() {
                 email: adminEmail,
                 name: 'Admin',
                 password: hashedPassword,
+                role: 'ADMIN',
                 // Create default config
                 configuracion: {
                     create: {
