@@ -29,6 +29,7 @@ model User {
   ahorros           Ahorro[]
   categorias        Categoria[]
   plazos            Plazo[]
+  inversiones       Inversion[]
   miembros          Miembro[]
   configuracion     Configuracion?
   
@@ -189,4 +190,20 @@ model Ahorro {
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())
+}
+
+model Inversion {
+  id              Int      @id @default(autoincrement())
+  tipo            String   // 'ETF', 'Cripto', 'Accion', 'Fondo'
+  nombre          String   // e.g., "VWCE", "Bitcoin", "Apple"
+  cantidadInicial Float    // Initial amount invested
+  valorActual     Float    // Current value
+  fecha           DateTime @default(now())
+  notas           String?  // Optional notes
+  
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

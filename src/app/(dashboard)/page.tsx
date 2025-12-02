@@ -33,11 +33,19 @@ export default async function DashboardPage({
     const year = resolvedSearchParams.year ? parseInt(resolvedSearchParams.year as string) : new Date().getFullYear()
 
     const user = await getCurrentUser()
-    const [ingresos, gastos, availableMonths, savingsAnalysis] = await Promise.all([
+    const [ingresos, gastos, availableMonths, savingsAnalysis, investmentSummary] = await Promise.all([
         getIngresos(month, year),
         getGastos(month, year),
         getAvailableMonths(),
-        getSavingsAnalysis(month, year)
+        getSavingsAnalysis(month, year),
+        (async () => {
+            try {
+                const { getInvestmentSummary } = await import('@/app/actions/inversiones')
+                return await getInvestmentSummary(month, year)
+            } catch {
+                return { totalInvertido: 0, valorActualTotal: 0, gananciaPerdida: 0, roi: 0, invertidoEsteMes: 0, count: 0 }
+            }
+        })()
     ])
 
     const totalIngresos = ingresos.reduce((sum, item) => sum + item.monto, 0)

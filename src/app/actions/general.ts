@@ -12,8 +12,8 @@ export type AvailableDate = {
 export async function getAvailableMonths(): Promise<AvailableDate[]> {
     try {
         const user = await getCurrentUser()
-        // Fetch all dates from expenses, incomes, and savings
-        const [gastos, ingresos, ahorros] = await Promise.all([
+        // Fetch all dates from expenses, incomes, savings, and investments
+        const [gastos, ingresos, ahorros, inversiones] = await Promise.all([
             prisma.gasto.findMany({
                 where: { userId: user.id },
                 select: { fecha: true },
@@ -28,6 +28,11 @@ export async function getAvailableMonths(): Promise<AvailableDate[]> {
                 where: { userId: user.id },
                 select: { fecha: true },
                 orderBy: { fecha: 'desc' }
+            }),
+            prisma.inversion.findMany({
+                where: { userId: user.id },
+                select: { fecha: true },
+                orderBy: { fecha: 'desc' }
             })
         ])
 
@@ -36,6 +41,7 @@ export async function getAvailableMonths(): Promise<AvailableDate[]> {
             ...gastos.map(g => g.fecha),
             ...ingresos.map(i => i.fecha),
             ...ahorros.map(a => a.fecha),
+            ...inversiones.map(inv => inv.fecha),
             new Date() // Always include current date
         ]
 

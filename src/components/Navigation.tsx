@@ -14,7 +14,9 @@ import {
     HandCoins,
     LogOut,
     Shield,
-    Settings
+    Settings,
+    LineChart,
+    Menu
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { logout } from '@/app/actions/auth'
@@ -31,6 +33,7 @@ const navItems = [
         ]
     },
     { href: '/ahorros', icon: PiggyBank, label: 'Ahorros' },
+    { href: '/inversiones', icon: LineChart, label: 'Inversiones' },
     { href: '/prestamos', icon: HandCoins, label: 'Préstamos' },
     { href: '/plazos', icon: CreditCard, label: 'Plazos' },
 ]
