@@ -26,10 +26,15 @@ export async function addPrestamo(formData: FormData) {
         const persona = formData.get('persona') as string
         const monto = parseFloat(formData.get('monto') as string)
         const fechaPrestamo = new Date(formData.get('fechaPrestamo') as string)
-        const fechaRecordatorio = new Date(formData.get('fechaRecordatorio') as string)
+        const fechaRecordatorioStr = formData.get('fechaRecordatorio') as string
 
-        if (!persona || !monto || !fechaPrestamo || !fechaRecordatorio) {
-            return { success: false, error: 'Todos los campos son requeridos' }
+        // Make fechaRecordatorio optional
+        const fechaRecordatorio = fechaRecordatorioStr && fechaRecordatorioStr.trim()
+            ? new Date(fechaRecordatorioStr)
+            : null
+
+        if (!persona || !monto || !fechaPrestamo) {
+            return { success: false, error: 'Campos requeridos faltantes' }
         }
 
         // 1. Find or Create "Préstamos" Category

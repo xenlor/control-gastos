@@ -13,14 +13,14 @@ datasource db {
 // Auth Models
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  username      String    @unique
-  password      String    // Hashed password
-  role          String    @default("USER") // ADMIN or USER
-  image         String?
-  sessions      Session[]
-  
+  id       String    @id @default(cuid())
+  name     String?
+  username String    @unique
+  password String // Hashed password
+  role     String    @default("USER") // ADMIN or USER
+  image    String?
+  sessions Session[]
+
   // Relations
   gastos            Gasto[]
   ingresos          Ingreso[]
@@ -32,7 +32,7 @@ model User {
   inversiones       Inversion[]
   miembros          Miembro[]
   configuracion     Configuracion?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -48,26 +48,26 @@ model Session {
 // Application Models
 
 model Configuracion {
-  id                 Int      @id @default(autoincrement())
-  porcentajeAhorro   Float    @default(20.0)
-  
-  userId             String   @unique
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               Int   @id @default(autoincrement())
+  porcentajeAhorro Float @default(20.0)
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Categoria {
-  id          Int      @id @default(autoincrement())
-  nombre      String
-  color       String   @default("#6366f1")
-  icono       String?
-  createdAt   DateTime @default(now())
-  gastos      Gasto[]
-  
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  color     String   @default("#6366f1")
+  icono     String?
+  createdAt DateTime @default(now())
+  gastos    Gasto[]
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   @@unique([nombre, userId])
 }
@@ -77,107 +77,107 @@ model Ingreso {
   monto       Float
   descripcion String
   fecha       DateTime @default(now())
-  
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  prestamo    Prestamo?
 
-  createdAt   DateTime @default(now())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  prestamo Prestamo?
+
+  createdAt DateTime @default(now())
 }
 
 model Gasto {
-  id             Int       @id @default(autoincrement())
-  monto          Float
-  descripcion    String
-  categoriaId    Int
-  categoria      Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
-  fecha          DateTime  @default(now())
-  esCompartido   Boolean   @default(false)
+  id                Int              @id @default(autoincrement())
+  monto             Float
+  descripcion       String
+  categoriaId       Int
+  categoria         Categoria        @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+  fecha             DateTime         @default(now())
+  esCompartido      Boolean          @default(false)
   gastoCompartidoId Int?
   gastoCompartido   GastoCompartido? @relation(fields: [gastoCompartidoId], references: [id], onDelete: SetNull)
-  
-  userId         String?
-  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  prestamo       Prestamo?
 
-  createdAt      DateTime  @default(now())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  prestamo Prestamo?
+
+  createdAt DateTime @default(now())
 }
 
 model Prestamo {
-  id              Int      @id @default(autoincrement())
-  persona         String
-  monto           Float
-  fechaPrestamo   DateTime @default(now())
-  fechaRecordatorio DateTime
-  pagado          Boolean  @default(false)
-  
-  gastoId         Int?     @unique
-  gasto           Gasto?   @relation(fields: [gastoId], references: [id])
-  
-  ingresoId       Int?     @unique
-  ingreso         Ingreso? @relation(fields: [ingresoId], references: [id])
-  
-  userId          String?
-  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                Int       @id @default(autoincrement())
+  persona           String
+  monto             Float
+  fechaPrestamo     DateTime  @default(now())
+  fechaRecordatorio DateTime? // Optional reminder date
+  pagado            Boolean   @default(false)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  gastoId Int?   @unique
+  gasto   Gasto? @relation(fields: [gastoId], references: [id])
+
+  ingresoId Int?     @unique
+  ingreso   Ingreso? @relation(fields: [ingresoId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Plazo {
-  id                 Int      @id @default(autoincrement())
-  descripcion        String
-  montoTotal         Float
-  totalCuotas        Int
-  cuotasPagadas      Int      @default(0)
-  montoCuota         Float
-  fechaInicio        DateTime @default(now())
-  estado             String   @default("ACTIVO") // Added default based on previous code, though schema didn't show it explicitly in diff, it's safer.
-  
-  userId             String?
-  user               User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  descripcion   String
+  montoTotal    Float
+  totalCuotas   Int
+  cuotasPagadas Int      @default(0)
+  montoCuota    Float
+  fechaInicio   DateTime @default(now())
+  estado        String   @default("ACTIVO") // Added default based on previous code, though schema didn't show it explicitly in diff, it's safer.
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GastoCompartido {
-  id          Int      @id @default(autoincrement())
+  id          Int                      @id @default(autoincrement())
   descripcion String
   montoTotal  Float
-  fecha       DateTime @default(now())
+  fecha       DateTime                 @default(now())
   miembros    MiembroGastoCompartido[]
   gastos      Gasto[]
-  
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 model MiembroGastoCompartido {
-  id                 Int              @id @default(autoincrement())
-  nombre             String
-  ingresoMensual     Float
-  esUsuario          Boolean          @default(false)
-  gastoCompartidoId  Int
-  gastoCompartido    GastoCompartido  @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
-  createdAt          DateTime         @default(now())
+  id                Int             @id @default(autoincrement())
+  nombre            String
+  ingresoMensual    Float
+  esUsuario         Boolean         @default(false)
+  gastoCompartidoId Int
+  gastoCompartido   GastoCompartido @relation(fields: [gastoCompartidoId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
 }
 
 model Miembro {
-  id             Int      @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   nombre         String
   ingresoMensual Float
-  esUsuario      Boolean  @default(false)
-  
-  userId         String?
-  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  esUsuario      Boolean @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Ahorro {
@@ -185,24 +185,24 @@ model Ahorro {
   monto       Float
   descripcion String
   fecha       DateTime @default(now())
-  
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 model Inversion {
-  id              Int      @id @default(autoincrement())
-  tipo            String   // 'ETF', 'Cripto', 'Accion', 'Fondo'
-  nombre          String   // e.g., "VWCE", "Bitcoin", "Apple"
-  monto           Float    // Amount invested
-  fecha           DateTime @default(now())
-  notas           String?  // Optional notes
-  
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id     Int      @id @default(autoincrement())
+  tipo   String // 'ETF', 'Cripto', 'Accion', 'Fondo'
+  nombre String // e.g., "VWCE", "Bitcoin", "Apple"
+  monto  Float // Amount invested
+  fecha  DateTime @default(now())
+  notas  String? // Optional notes
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -120,14 +120,13 @@ export default async function PrestamosPage() {
 
                             <div className="space-y-2">
                                 <label htmlFor="fechaRecordatorio" className="text-sm font-medium text-muted ml-1">
-                                    Fecha de Cobro (Recordatorio)
+                                    Fecha de Cobro (opcional)
                                 </label>
                                 <div className="relative">
                                     <input
                                         type="date"
                                         id="fechaRecordatorio"
                                         name="fechaRecordatorio"
-                                        required
                                         className="input-modern !pl-12"
                                     />
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
@@ -183,7 +182,7 @@ export default async function PrestamosPage() {
                                                     </div>
                                                     <div className={`flex items-center gap-1 ${!prestamo.pagado && 'text-warning'}`}>
                                                         <Bell className="w-3 h-3" />
-                                                        Cobrar: {format(new Date(prestamo.fechaRecordatorio), "d MMM yyyy", { locale: es })}
+                                                        Cobrar: {prestamo.fechaRecordatorio ? format(new Date(prestamo.fechaRecordatorio), "d MMM yyyy", { locale: es }) : 'Sin recordatorio'}
                                                     </div>
                                                 </div>
                                             </div>
