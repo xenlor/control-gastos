@@ -136,8 +136,8 @@ export default function Navigation({ userRole }: NavigationProps) {
                         </Link>
 
                         {/* Desktop Menu with overflow detection */}
-                        <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4 overflow-hidden">
-                            <div className="flex items-center gap-1 w-full">
+                        <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4">
+                            <div className="flex items-center gap-1 w-full overflow-hidden">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
@@ -195,77 +195,77 @@ export default function Navigation({ userRole }: NavigationProps) {
                                         </Link>
                                     )
                                 })}
-
-                                {/* Overflow Menu */}
-                                {overflowItems.length > 0 && (
-                                    <div className="relative">
-                                        <button
-                                            onClick={() => setShowOverflow(!showOverflow)}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-muted hover:text-foreground hover:bg-white/5 transition-all"
-                                        >
-                                            <Menu className="w-4 h-4" />
-                                            <span className="text-sm font-medium">Más</span>
-                                        </button>
-
-                                        {showOverflow && (
-                                            <>
-                                                <div className="fixed inset-0" onClick={() => setShowOverflow(false)} />
-                                                <div className="absolute top-full right-0 mt-2 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-lg p-2 min-w-[200px] z-50">
-                                                    {overflowItems.map((href) => {
-                                                        const item = getItemByHref(href)
-                                                        if (!item) return null
-
-                                                        const Icon = item.icon
-                                                        const isActive = pathname === href
-
-                                                        if ('submenu' in item && item.submenu) {
-                                                            return (
-                                                                <div key={href}>
-                                                                    <Link
-                                                                        href={item.href}
-                                                                        onClick={() => setShowOverflow(false)}
-                                                                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
-                                                                    >
-                                                                        <Icon className="w-4 h-4" />
-                                                                        <span className="text-sm font-medium">{item.label}</span>
-                                                                    </Link>
-                                                                    {item.submenu.map((subItem) => {
-                                                                        const SubIcon = subItem.icon
-                                                                        const isSubActive = pathname === subItem.href
-                                                                        return (
-                                                                            <Link
-                                                                                key={subItem.href}
-                                                                                href={subItem.href}
-                                                                                onClick={() => setShowOverflow(false)}
-                                                                                className={`flex items-center gap-3 px-8 py-3 transition-colors ${isSubActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
-                                                                            >
-                                                                                <SubIcon className="w-4 h-4" />
-                                                                                <span className="text-sm font-medium">{subItem.label}</span>
-                                                                            </Link>
-                                                                        )
-                                                                    })}
-                                                                </div>
-                                                            )
-                                                        }
-
-                                                        return (
-                                                            <Link
-                                                                key={href}
-                                                                href={href}
-                                                                onClick={() => setShowOverflow(false)}
-                                                                className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
-                                                            >
-                                                                <Icon className="w-4 h-4" />
-                                                                <span className="text-sm font-medium">{item.label}</span>
-                                                            </Link>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
                             </div>
+
+                            {/* Overflow Menu */}
+                            {overflowItems.length > 0 && (
+                                <div className="relative ml-2 shrink-0">
+                                    <button
+                                        onClick={() => setShowOverflow(!showOverflow)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-muted hover:text-foreground hover:bg-white/5 transition-all"
+                                    >
+                                        <Menu className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Más</span>
+                                    </button>
+
+                                    {showOverflow && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setShowOverflow(false)} />
+                                            <div className="absolute top-full right-0 mt-2 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-lg p-2 min-w-[200px] z-50">
+                                                {overflowItems.map((href) => {
+                                                    const item = getItemByHref(href)
+                                                    if (!item) return null
+
+                                                    const Icon = item.icon
+                                                    const isActive = pathname === href
+
+                                                    if ('submenu' in item && item.submenu) {
+                                                        return (
+                                                            <div key={href}>
+                                                                <Link
+                                                                    href={item.href}
+                                                                    onClick={() => setShowOverflow(false)}
+                                                                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                                >
+                                                                    <Icon className="w-4 h-4" />
+                                                                    <span className="text-sm font-medium">{item.label}</span>
+                                                                </Link>
+                                                                {item.submenu.map((subItem) => {
+                                                                    const SubIcon = subItem.icon
+                                                                    const isSubActive = pathname === subItem.href
+                                                                    return (
+                                                                        <Link
+                                                                            key={subItem.href}
+                                                                            href={subItem.href}
+                                                                            onClick={() => setShowOverflow(false)}
+                                                                            className={`flex items-center gap-3 px-8 py-3 transition-colors ${isSubActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                                        >
+                                                                            <SubIcon className="w-4 h-4" />
+                                                                            <span className="text-sm font-medium">{subItem.label}</span>
+                                                                        </Link>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        )
+                                                    }
+
+                                                    return (
+                                                        <Link
+                                                            key={href}
+                                                            href={href}
+                                                            onClick={() => setShowOverflow(false)}
+                                                            className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                        >
+                                                            <Icon className="w-4 h-4" />
+                                                            <span className="text-sm font-medium">{item.label}</span>
+                                                        </Link>
+                                                    )
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* User Actions */}
