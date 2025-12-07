@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Navigate to project root
+cd "$(dirname "$0")/.."
+echo -e "📂 Working directory: $(pwd)"
+
 # Colores
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'

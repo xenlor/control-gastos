@@ -8,6 +8,11 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}🚀 Iniciando despliegue de Control de Gastos...${NC}"
 
+# Navigate to project root
+cd "$(dirname "$0")/.."
+echo -e "📂 Working directory: $(pwd)"
+
+
 # 1. Verificar dependencias
 echo -e "\n${BLUE}1. Verificando dependencias...${NC}"
 if ! command -v docker &> /dev/null; then

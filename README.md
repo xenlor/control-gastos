@@ -158,7 +158,9 @@ Este proyecto es software privado. Todos los derechos reservados.
 
 **Última actualización**: Diciembre 2024
 
-## 📸 Galería
+
+<details>
+<summary>📸 Galería de Imágenes (Clic para expandir)</summary>
 
 | Dashboard | Inversiones |
 |---|---|
@@ -175,3 +177,6 @@ Este proyecto es software privado. Todos los derechos reservados.
 | Móvil | |
 |---|---|
 | ![Móvil](docs/screenshots/mobile.png) | |
+
+</details>
+
