@@ -1,10 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Wallet, Shield, Settings, LogOut } from 'lucide-react'
-import { MobileMenuButton } from './MobileMenuButton'
-import { MobileMenu } from './MobileMenu'
 
 interface MobileHeaderProps {
     userName: string
@@ -12,25 +9,18 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({ userName, userRole }: MobileHeaderProps) {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     return (
         <>
             {/* Mobile Header - only shows on mobile */}
             <header className="fixed top-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-b border-border">
                 <div className="flex items-center justify-between px-4 h-16">
-                    {/* Hamburger Button */}
-                    <MobileMenuButton
-                        isOpen={isMobileMenuOpen}
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    />
-
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                             <Wallet className="w-5 h-5 text-white" />
                         </div>
-                        <span className="font-bold text-foreground">Control Gastos</span>
+                        <span className="font-bold text-foreground">XenCapital</span>
                     </Link>
 
                     {/* User Actions - Icons Only */}
@@ -63,14 +53,6 @@ export function MobileHeader({ userName, userRole }: MobileHeaderProps) {
                     </div>
                 </div>
             </header>
-
-            {/* Mobile Menu */}
-            <MobileMenu
-                isOpen={isMobileMenuOpen}
-                onClose={() => setIsMobileMenuOpen(false)}
-                userName={userName}
-                userRole={userRole}
-            />
 
             {/* Spacer for fixed header on mobile */}
             <div className="h-16 md:hidden" />

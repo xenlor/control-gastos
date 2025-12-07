@@ -130,7 +130,7 @@ export default function Navigation({ userRole }: NavigationProps) {
                                 <Wallet className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex flex-col shrink-0">
-                                <span className="font-bold text-lg tracking-tight text-foreground whitespace-nowrap">Control Gastos</span>
+                                <span className="font-bold text-lg tracking-tight text-foreground whitespace-nowrap">XenCapital</span>
                                 <span className="text-[10px] text-muted font-medium uppercase tracking-wider whitespace-nowrap">Finanzas Personales</span>
                             </div>
                         </Link>

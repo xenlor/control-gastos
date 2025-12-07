@@ -23,7 +23,7 @@ export default function LoginPage() {
                             <Wallet className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-300" />
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
-                            Control Gastos
+                            XenCapital
                         </h1>
                         <p className="text-slate-400 text-sm">
                             Gestiona tus finanzas personales de forma inteligente
@@ -37,7 +37,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <p className="text-center text-slate-600 text-xs mt-8">
-                    &copy; {new Date().getFullYear()} Control Gastos. Todos los derechos reservados.
+                    &copy; {new Date().getFullYear()} XenCapital. Todos los derechos reservados.
                 </p>
             </div>
         </div>
