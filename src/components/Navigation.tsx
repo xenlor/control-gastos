@@ -59,7 +59,7 @@ export default function Navigation({ userRole }: NavigationProps) {
 
             const containerWidth = navRef.current.offsetWidth
             // Buffer for the "More" button (approx width + margin + safety)
-            const moreButtonWidth = 60
+            const moreButtonWidth = 120
             const safetyBuffer = 20
 
             // First pass: Measure any items that are currently rendered and don't have a stored width
@@ -137,7 +137,7 @@ export default function Navigation({ userRole }: NavigationProps) {
 
                         {/* Desktop Menu with overflow detection */}
                         <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4">
-                            <div className="flex-1 flex items-center gap-1 overflow-hidden">
+                            <div className="flex items-center gap-1 overflow-hidden">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
@@ -202,10 +202,10 @@ export default function Navigation({ userRole }: NavigationProps) {
                                 <div className="relative ml-2 shrink-0">
                                     <button
                                         onClick={() => setShowOverflow(!showOverflow)}
-                                        className="flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-foreground hover:bg-white/5 transition-all"
-                                        aria-label="Más opciones"
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-muted hover:text-foreground hover:bg-white/5 transition-all"
                                     >
-                                        <Menu className="w-5 h-5" />
+                                        <Menu className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Más</span>
                                     </button>
 
                                     {showOverflow && (
