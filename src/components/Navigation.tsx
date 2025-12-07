@@ -65,7 +65,7 @@ export default function Navigation({ userRole }: NavigationProps) {
 
                         {/* Desktop Menu */}
                         <div className="flex-1 flex items-center min-w-0 mx-4">
-                            <div className="flex items-center gap-1 w-full px-2 overflow-visible">
+                            <div className="flex items-center gap-1 w-full overflow-x-auto scrollbar-hide px-2">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
