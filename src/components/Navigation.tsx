@@ -58,20 +58,19 @@ export default function Navigation({ userRole }: NavigationProps) {
             if (!navRef.current) return
 
             const containerWidth = navRef.current.offsetWidth
-            // Buffer for the "More" button (approx 90px) + safety padding
-            const moreButtonWidth = 100
+            // Buffer for the "More" button (approx width + margin + safety)
+            const moreButtonWidth = 120
+            const safetyBuffer = 20
 
             // First pass: Measure any items that are currently rendered and don't have a stored width
             navItems.forEach(item => {
                 const element = itemRefs.current.get(item.href)
                 if (element && !itemWidths.current.has(item.href)) {
                     // Store the width including margin/padding
-                    itemWidths.current.set(item.href, element.offsetWidth + 8) // +8 for gap
+                    // We use a slightly larger gap estimate to be safe
+                    itemWidths.current.set(item.href, element.offsetWidth + 8)
                 }
             })
-
-            // If we haven't measured all items yet, we might be in initial render or weird state.
-            // But we should try to calculate with what we have.
 
             let currentWidth = 0
             const visible: string[] = []
@@ -79,14 +78,15 @@ export default function Navigation({ userRole }: NavigationProps) {
             const allItemsWidth = navItems.reduce((sum, item) => sum + (itemWidths.current.get(item.href) || 0), 0)
 
             // Check if EVERYTHING fits without the "More" button
-            if (allItemsWidth <= containerWidth) {
+            // We subtract a safety buffer from the container width
+            if (allItemsWidth <= (containerWidth - safetyBuffer)) {
                 setVisibleItems(navItems.map(i => i.href))
                 setOverflowItems([])
                 return
             }
 
             // If not, we need the "More" button, so reduce available space
-            const availableWidth = containerWidth - moreButtonWidth
+            const availableWidth = containerWidth - moreButtonWidth - safetyBuffer
 
             navItems.forEach((item) => {
                 const width = itemWidths.current.get(item.href) || 120 // Fallback width if not measured yet
@@ -137,7 +137,7 @@ export default function Navigation({ userRole }: NavigationProps) {
 
                         {/* Desktop Menu with overflow detection */}
                         <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4">
-                            <div className="flex items-center gap-1 w-full overflow-hidden">
+                            <div className="flex-1 flex items-center gap-1 overflow-hidden">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
