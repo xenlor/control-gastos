@@ -17,6 +17,7 @@ import {
     Settings,
     LogOut
 } from 'lucide-react'
+import { logout } from '@/app/actions/auth'
 
 interface MobileMenuProps {
     isOpen: boolean
@@ -161,7 +162,7 @@ export function MobileMenu({ isOpen, onClose, userName, userRole }: MobileMenuPr
                                         </Link>
                                     )
                                 })}
-                                <form action="/api/auth/signout" method="POST">
+                                <form action={logout}>
                                     <button
                                         type="submit"
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl text-danger hover:bg-danger/10 transition-all w-full text-left"

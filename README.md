@@ -4,6 +4,10 @@
 ![License](https://img.shields.io/badge/License-Private-red)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 
+<div align="center">
+  <img src="docs/screenshots/logo.png" alt="XenCapital Logo" width="250">
+</div>
+
 Aplicación web moderna para gestión de finanzas personales con dashboard interactivo, categorización de gastos, tracking de ahorros, inversiones e informes exportables.
 
 ## 🚀 Características
@@ -19,6 +23,25 @@ Aplicación web moderna para gestión de finanzas personales con dashboard inter
 - 🔐 **Sistema de Autenticación** - Login seguro con NextAuth v5
 - 👨‍💼 **Panel de Administración** - Gestión de usuarios y configuración
 - 🌙 **Interfaz Moderna** - Diseño dark mode con efectos glassmorphism
+- 📱 **Diseño Responsive** - Funciona perfectamente en móviles y escritorio
+
+## 📸 Galería
+
+| Dashboard | Inversiones |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Inversiones](docs/screenshots/inversiones.png) |
+
+| Ingresos | Gastos |
+|---|---|
+| ![Ingresos](docs/screenshots/ingresos.png) | ![Gastos](docs/screenshots/gastos.png) |
+
+| Préstamos | Plazos |
+|---|---|
+| ![Préstamos](docs/screenshots/prestamos.png) | ![Plazos](docs/screenshots/plazos.png) |
+
+| Móvil | |
+|---|---|
+| ![Móvil](docs/screenshots/mobile.png) | |
 
 ## 🛠️ Stack Tecnológico
 
@@ -65,14 +88,17 @@ Aplicación web moderna para gestión de finanzas personales con dashboard inter
 3. **Configurar entorno**
    Crea un archivo `.env`:
    ```env
-   DATABASE_URL="postgresql://admin:adminpassword@localhost:5432/control_gastos"
-   AUTH_SECRET="genera-uno-con-openssl-rand-base64-32"
-   NEXTAUTH_URL="http://localhost:3000"
+    POSTGRES_USER="postgres"
+    POSTGRES_PASSWORD="tu-password-segura"
+    POSTGRES_DB="control_gastos"
+    DATABASE_URL="postgresql://postgres:tu-password-segura@localhost:5432/control_gastos"
+    AUTH_SECRET="genera-uno-con-openssl-rand-base64-32"
+    NEXTAUTH_URL="http://localhost:3000"
    ```
 
 4. **Levantar base de datos**
    ```bash
-   docker-compose up -d postgres
+   docker compose up -d postgres
    ```
 
 5. **Inicializar base de datos**
@@ -80,10 +106,7 @@ Aplicación web moderna para gestión de finanzas personales con dashboard inter
    npx prisma db push
    ```
 
-6. **Crear usuario administrador**
-   ```bash
-   node scripts/crear-usuario.js admin Pass123! "Administrador" ADMIN
-   ```
+   node scripts/fix-admin.js admin
 
 7. **Ejecutar en modo desarrollo**
    ```bash
@@ -94,53 +117,6 @@ Aplicación web moderna para gestión de finanzas personales con dashboard inter
 
 ## 📚 Documentación
 
-- [📖 Guía de Despliegue](docs/DEPLOYMENT.md) - Instrucciones detalladas para producción
-- [🗄️ Estructura de Base de Datos](docs/DATABASE.md) - Documentación del esquema y modelos
-- [🔌 API Reference](docs/API.md) - Documentación de Server Actions
-
-## 🐳 Despliegue en Producción
-
-El proyecto incluye archivos Docker y Docker Compose para despliegue. Consulta la [Guía de Despliegue](docs/DEPLOYMENT.md) para más detalles.
-
-## 👤 Gestión de Usuarios
-
-### Panel de Administración
-La aplicación cuenta con una interfaz gráfica para administradores:
-1. Inicia sesión como administrador
-2. Ve a **Admin** > **Usuarios**
-3. Gestiona usuarios: crear, cambiar contraseñas, eliminar
-
-### Scripts CLI
-Si pierdes acceso al panel, puedes usar los scripts de terminal:
-
-```bash
-# Crear usuario (username, password, nombre, role)
-node scripts/crear-usuario.js esteban Pass123! "Esteban" ADMIN
-
-# Eliminar usuario (interactivo)
-node scripts/eliminar-usuario.js
-```
-
-**Roles disponibles:**
-- `ADMIN` - Acceso completo + panel de administración
-- `USER` - Acceso a funcionalidades personales
-
-## 📦 Copias de Seguridad
-
-### Exportar base de datos
-```bash
-docker-compose exec postgres pg_dump -U postgres control_gastos > backup.sql
-```
-
-### Importar base de seguridad
-```bash
-cat backup.sql | docker-compose exec -T postgres psql -U postgres -d control_gastos
-```
-
-### Resetear base de datos
-```bash
-npx prisma db push --force-reset
-```
 **⚠️ ADVERTENCIA:** Esto borrará **TODOS** los datos.
 
 ## 🔧 Scripts Útiles

@@ -21,6 +21,7 @@ import {
     Menu,
     ChevronDown
 } from 'lucide-react'
+import { logout } from '@/app/actions/auth'
 
 const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -89,13 +90,16 @@ export default function Navigation({ userRole }: NavigationProps) {
             // If not, we need the "More" button, so reduce available space
             const availableWidth = containerWidth - moreButtonWidth - safetyBuffer
 
+            let hasOverflowed = false
+
             navItems.forEach((item) => {
                 const width = itemWidths.current.get(item.href) || 120 // Fallback width if not measured yet
 
-                if (currentWidth + width <= availableWidth) {
+                if (!hasOverflowed && currentWidth + width <= availableWidth) {
                     visible.push(item.href)
                     currentWidth += width
                 } else {
+                    hasOverflowed = true
                     overflow.push(item.href)
                 }
             })
@@ -143,7 +147,7 @@ export default function Navigation({ userRole }: NavigationProps) {
 
                         {/* Desktop Menu with overflow detection */}
                         <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4">
-                            <div className="flex items-center gap-1 overflow-hidden">
+                            <div className="flex items-center gap-1">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
@@ -292,7 +296,7 @@ export default function Navigation({ userRole }: NavigationProps) {
                             >
                                 <Settings className="w-5 h-5" />
                             </Link>
-                            <form action="/api/auth/signout" method="POST">
+                            <form action={logout}>
                                 <button
                                     type="submit"
                                     className="p-2 rounded-lg text-danger hover:bg-danger/10 transition-colors"

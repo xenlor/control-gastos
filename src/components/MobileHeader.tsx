@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Shield, Settings, LogOut } from 'lucide-react'
+import { logout } from '@/app/actions/auth'
 
 interface MobileHeaderProps {
     userName: string
@@ -47,7 +48,7 @@ export function MobileHeader({ userName, userRole }: MobileHeaderProps) {
                         >
                             <Settings className="w-5 h-5" />
                         </Link>
-                        <form action="/api/auth/signout" method="POST" className="inline">
+                        <form action={logout} className="inline">
                             <button
                                 type="submit"
                                 className="p-2 rounded-lg text-danger hover:bg-danger/10 transition-colors"

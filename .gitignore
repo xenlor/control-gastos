@@ -50,3 +50,10 @@ page_test_output.txt
 
 # deployment
 deploy.zip
+_secure_backup/
+
+# Local Deployment Scripts
+scripts/*.ps1
+# Sensitive Documentation
+docs/ENV_REFERENCE.txt
+control-gastos-update.zip

@@ -12,11 +12,12 @@ El servidor debe tener instalado:
 ## Pasos para el Despliegue
 
 1. **Subir Archivos**
-   Sube el archivo `deploy.zip` a tu servidor y descomprímelo:
+   Sube el archivo ZIP con el código (ej: `deploy.zip` o `control-gastos-update.zip`) a tu servidor y descomprímelo:
    ```bash
-   unzip deploy.zip -d control-gastos
+   unzip -o deploy.zip -d control-gastos
    cd control-gastos
    ```
+   > **Nota:** El flag `-o` sobrescribe los archivos existentes sin preguntar, útil para actualizaciones.
 
 2. **Ejecutar Script de Despliegue**
    El script `deploy.sh` automatiza todo el proceso:
@@ -41,20 +42,48 @@ El servidor debe tener instalado:
 
 ### Ver Logs
 ```bash
-docker-compose logs -f app
+docker compose logs -f app
+docker compose logs -f app
 ```
 
 ### Reiniciar Servicios
 ```bash
-docker-compose restart
+docker compose restart
 ```
 
 ### Actualizar Aplicación
-Si subes nuevos cambios (nuevo `deploy.zip`):
-```bash
-./deploy.sh
+Si subes nuevos cambios (un nuevo ZIP):
+
+1. **Descomprimir**: `unzip -o nuevo-archivo.zip` (Sobrescribe archivos)
+2. **Reconstruir**:
+   ```bash
+   # Opción A: Usando el script
+   ./deploy.sh
+
+   # Opción B: Manualmente con Docker Compose
+   docker compose up -d --build
+   
+   # Si hay cambios en la base de datos
+   docker compose exec app npx prisma db push
+   ```
+
+## Despliegue Automático (Desde Windows Local)
+
+Para facilitar el despliegue, se han creado scripts de PowerShell que automatizan el proceso. Estos scripts están excluidos de git (`.gitignore`) por seguridad, pero puedes recrearlos o usarlos si tienes acceso al código fuente local.
+
+### 1. `scripts/generate-zip.ps1`
+Empaqueta todo el proyecto en `control-gastos-update.zip`, excluyendo archivos innecesarios.
+
+### 2. `scripts/deploy-vps.ps1`
+1. Sube el ZIP al VPS.
+2. Detiene los contenedores (`docker-compose down`).
+3. Descomprime y redespliega (`deploy.sh`).
+
+**Uso:**
+```powershell
+.\scripts\generate-zip.ps1
+.\scripts\deploy-vps.ps1
 ```
-(El script reconstruirá los contenedores).
 
 ## Copias de Seguridad y Restauración
 
