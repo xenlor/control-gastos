@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -16,10 +17,9 @@ import {
     Shield,
     Settings,
     LineChart,
-    Menu
+    Menu,
+    ChevronDown
 } from 'lucide-react'
-import { ThemeToggle } from './ThemeToggle'
-import { logout } from '@/app/actions/auth'
 
 const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -44,6 +44,45 @@ interface NavigationProps {
 
 export default function Navigation({ userRole }: NavigationProps) {
     const pathname = usePathname()
+    const [visibleItems, setVisibleItems] = useState<string[]>([])
+    const [overflowItems, setOverflowItems] = useState<string[]>([])
+    const [showOverflow, setShowOverflow] = useState(false)
+    const navRef = useRef<HTMLDivElement>(null)
+    const itemRefs = useRef<Map<string, HTMLElement>>(new Map())
+
+    // Detect overflow items
+    useEffect(() => {
+        const checkOverflow = () => {
+            if (!navRef.current) return
+
+            const navRect = navRef.current.getBoundingClientRect()
+            const visible: string[] = []
+            const overflow: string[] = []
+
+            navItems.forEach((item) => {
+                const element = itemRefs.current.get(item.href)
+                if (!element) return
+
+                const rect = element.getBoundingClientRect()
+                const isFullyVisible = rect.right <= navRect.right - 50 // 50px buffer for actions
+
+                if (isFullyVisible) {
+                    visible.push(item.href)
+                } else {
+                    overflow.push(item.href)
+                }
+            })
+
+            setVisibleItems(visible)
+            setOverflowItems(overflow)
+        }
+
+        checkOverflow()
+        window.addEventListener('resize', checkOverflow)
+        return () => window.removeEventListener('resize', checkOverflow)
+    }, [])
+
+    const getItemByHref = (href: string) => navItems.find(item => item.href === href)
 
     return (
         <>
@@ -63,33 +102,33 @@ export default function Navigation({ userRole }: NavigationProps) {
                             </div>
                         </Link>
 
-                        {/* Desktop Menu */}
-                        <div className="flex-1 flex items-center min-w-0 mx-4">
-                            <div className="flex items-center gap-1 w-full overflow-x-auto scrollbar-hide px-2">
+                        {/* Desktop Menu with overflow detection */}
+                        <div ref={navRef} className="flex-1 flex items-center min-w-0 mx-4">
+                            <div className="flex items-center gap-1">
                                 {navItems.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathname === item.href || ('submenu' in item && item.submenu?.some(sub => pathname === sub.href))
+                                    const isVisible = visibleItems.includes(item.href)
+
+                                    if (!isVisible) return null
 
                                     if ('submenu' in item && item.submenu) {
-                                        // Dropdown item
                                         return (
-                                            <div key={item.href} className="relative group">
+                                            <div
+                                                key={item.href}
+                                                ref={(el) => { if (el) itemRefs.current.set(item.href, el) }}
+                                                className="relative group"
+                                            >
                                                 <Link
                                                     href={item.href}
-                                                    className={`
-                                                        flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium shrink-0 whitespace-nowrap
-                                                        ${isActive
-                                                            ? 'text-primary bg-primary/10'
-                                                            : 'text-muted hover:text-foreground hover:bg-white/5'
-                                                        }
-                                                    `}
+                                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium shrink-0 whitespace-nowrap ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
                                                 >
                                                     <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                                                     <span className="text-sm tracking-wide">{item.label}</span>
+                                                    <ChevronDown className="w-3 h-3 opacity-60" />
                                                 </Link>
-                                                {/* Dropdown Menu */}
-                                                <div className="absolute top-full left-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] min-w-[180px]">
-                                                    <div className="bg-card/95 backdrop-blur-md border border-border rounded-xl shadow-lg overflow-hidden">
+                                                <div className="absolute top-full left-0 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                                    <div className="bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-lg p-2 min-w-[200px]">
                                                         {item.submenu.map((subItem) => {
                                                             const SubIcon = subItem.icon
                                                             const isSubActive = pathname === subItem.href
@@ -97,13 +136,7 @@ export default function Navigation({ userRole }: NavigationProps) {
                                                                 <Link
                                                                     key={subItem.href}
                                                                     href={subItem.href}
-                                                                    className={`
-                                                                        flex items-center gap-3 px-4 py-3 transition-colors
-                                                                        ${isSubActive
-                                                                            ? 'text-primary bg-primary/10'
-                                                                            : 'text-muted hover:text-foreground hover:bg-white/5'
-                                                                        }
-                                                                    `}
+                                                                    className={`flex items-center gap-3 px-4 py-3 transition-colors ${isSubActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
                                                                 >
                                                                     <SubIcon className="w-4 h-4" />
                                                                     <span className="text-sm font-medium">{subItem.label}</span>
@@ -116,29 +149,93 @@ export default function Navigation({ userRole }: NavigationProps) {
                                         )
                                     }
 
-                                    // Regular item
                                     return (
                                         <Link
                                             key={item.href}
+                                            ref={(el) => { if (el) itemRefs.current.set(item.href, el) }}
                                             href={item.href}
-                                            className={`
-                                                flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shrink-0 whitespace-nowrap
-                                                ${isActive
-                                                    ? 'text-primary bg-primary/10'
-                                                    : 'text-muted hover:text-foreground hover:bg-white/5'
-                                                }
-                                            `}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shrink-0 whitespace-nowrap ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
                                         >
                                             <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                                             <span className="text-sm tracking-wide">{item.label}</span>
                                         </Link>
                                     )
                                 })}
+
+                                {/* Overflow Menu */}
+                                {overflowItems.length > 0 && (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setShowOverflow(!showOverflow)}
+                                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-muted hover:text-foreground hover:bg-white/5 transition-all"
+                                        >
+                                            <Menu className="w-4 h-4" />
+                                            <span className="text-sm font-medium">Más</span>
+                                        </button>
+
+                                        {showOverflow && (
+                                            <>
+                                                <div className="fixed inset-0" onClick={() => setShowOverflow(false)} />
+                                                <div className="absolute top-full right-0 mt-2 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-lg p-2 min-w-[200px] z-50">
+                                                    {overflowItems.map((href) => {
+                                                        const item = getItemByHref(href)
+                                                        if (!item) return null
+
+                                                        const Icon = item.icon
+                                                        const isActive = pathname === href
+
+                                                        if ('submenu' in item && item.submenu) {
+                                                            return (
+                                                                <div key={href}>
+                                                                    <Link
+                                                                        href={item.href}
+                                                                        onClick={() => setShowOverflow(false)}
+                                                                        className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                                    >
+                                                                        <Icon className="w-4 h-4" />
+                                                                        <span className="text-sm font-medium">{item.label}</span>
+                                                                    </Link>
+                                                                    {item.submenu.map((subItem) => {
+                                                                        const SubIcon = subItem.icon
+                                                                        const isSubActive = pathname === subItem.href
+                                                                        return (
+                                                                            <Link
+                                                                                key={subItem.href}
+                                                                                href={subItem.href}
+                                                                                onClick={() => setShowOverflow(false)}
+                                                                                className={`flex items-center gap-3 px-8 py-3 transition-colors ${isSubActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                                            >
+                                                                                <SubIcon className="w-4 h-4" />
+                                                                                <span className="text-sm font-medium">{subItem.label}</span>
+                                                                            </Link>
+                                                                        )
+                                                                    })}
+                                                                </div>
+                                                            )
+                                                        }
+
+                                                        return (
+                                                            <Link
+                                                                key={href}
+                                                                href={href}
+                                                                onClick={() => setShowOverflow(false)}
+                                                                className={`flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-muted hover:text-foreground hover:bg-white/5'}`}
+                                                            >
+                                                                <Icon className="w-4 h-4" />
+                                                                <span className="text-sm font-medium">{item.label}</span>
+                                                            </Link>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Theme Toggle & Logout */}
-                        <div className="flex items-center gap-2">
+                        {/* User Actions */}
+                        <div className="flex items-center gap-2 shrink-0">
                             {userRole === 'ADMIN' && (
                                 <Link
                                     href="/admin/users"
@@ -150,68 +247,22 @@ export default function Navigation({ userRole }: NavigationProps) {
                             )}
                             <Link
                                 href="/settings"
-                                className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                                className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-white/5 transition-colors"
                                 title="Configuración"
                             >
                                 <Settings className="w-5 h-5" />
                             </Link>
-                            <ThemeToggle />
-                            <button
-                                onClick={() => logout()}
-                                className="p-2 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors"
-                                title="Cerrar Sesión"
-                            >
-                                <LogOut className="w-5 h-5" />
-                            </button>
+                            <form action="/api/auth/signout" method="POST">
+                                <button
+                                    type="submit"
+                                    className="p-2 rounded-lg text-danger hover:bg-danger/10 transition-colors"
+                                    title="Cerrar Sesión"
+                                >
+                                    <LogOut className="w-5 h-5" />
+                                </button>
+                            </form>
                         </div>
                     </div>
-                </div>
-            </nav>
-
-            {/* Mobile Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 pb-safe">
-                <div className="flex justify-around items-center p-4">
-                    {navItems.map((item) => {
-                        const Icon = item.icon
-                        const isActive = pathname === item.href
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-muted'
-                                    }`}
-                            >
-                                <Icon className="w-6 h-6" />
-                                <span className="text-[10px] font-medium">{item.label}</span>
-                            </Link>
-                        )
-                    })}
-
-                    <Link
-                        href="/settings"
-                        className={`flex flex-col items-center gap-1 transition-colors ${pathname === '/settings' ? 'text-primary' : 'text-muted'}`}
-                    >
-                        <Settings className="w-6 h-6" />
-                        <span className="text-[10px] font-medium">Ajustes</span>
-                    </Link>
-
-                    {userRole === 'ADMIN' && (
-                        <Link
-                            href="/admin/users"
-                            className="flex flex-col items-center gap-1 text-muted hover:text-primary transition-colors"
-                        >
-                            <Shield className="w-6 h-6" />
-                            <span className="text-[10px] font-medium">Admin</span>
-                        </Link>
-                    )}
-
-                    <button
-                        onClick={() => logout()}
-                        className="flex flex-col items-center gap-1 text-muted hover:text-danger transition-colors"
-                    >
-                        <LogOut className="w-6 h-6" />
-                        <span className="text-[10px] font-medium">Salir</span>
-                    </button>
                 </div>
             </nav>
         </>
